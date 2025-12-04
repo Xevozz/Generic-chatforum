@@ -246,4 +246,86 @@ button {
   align-self: flex-end;
 }
 
-/* ===== Ukendt ===== */
+/* ===== Post + Comment ===== */
+
+.post-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.like-btn {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.comment-input-field {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.comment-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.comments-list {
+  margin-top: 12px;
+}
+
+.comment {
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.no-comments {
+  color: #666;
+  font-size: 14px;
+}
+
+post-header {
+  display: flex;
+  justify-content: space-between;   /* VENSTRE / HØJRE */
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Venstre del — avatar + navn */
+.post-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.post-author {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* Højre del — timestamp */
+.post-timestamp {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Post tekst */
+.post-text {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+/* ===== ukendt ===== */
+

@@ -9,19 +9,28 @@ import {
 function Post({ post }) {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
-  const [sendingComment, setSendingComment] = useState(false);
+  const [sending, setSending] = useState(false);
   const [liking, setLiking] = useState(false);
 
+  // --- Udregn felter så både "gamle" og "nye" posts virker ---
   const authorName =
     post.authorName || post.author || post.authorId || "Ukendt bruger";
-  const text = post.Content || post.content || "";
-  const likeCount = post.likeCount ?? 0;
 
-  let formattedDate = "Ukendt tidspunkt";
+  // Tekst kan komme fra Content (nye posts) eller text (gamle)
+  const text = post.Content ?? post.content ?? post.text ?? "";
+
+  // Dato: Firestore timestamp eller en allerede formateret streng
+  let formattedDate = "";
   if (post.createdAt?.toDate) {
     formattedDate = post.createdAt.toDate().toLocaleString();
+  } else if (post.date) {
+    formattedDate = post.date;
   }
 
+  // Likes: likeCount (nye) eller likes (gamle)
+  const likes = post.likeCount ?? post.likes ?? 0;
+
+  // --- Lyt til kommentarer i realtime ---
   useEffect(() => {
     if (!post.id) return;
 
@@ -32,6 +41,7 @@ function Post({ post }) {
     return () => unsubscribe();
   }, [post.id]);
 
+  // --- Like et opslag ---
   async function handleLike() {
     if (!post.id) return;
     setLiking(true);
@@ -44,64 +54,74 @@ function Post({ post }) {
     }
   }
 
-  async function handleSubmitComment(e) {
+  // --- Tilføj kommentar ---
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!commentText.trim() || !post.id) return;
 
-    setSendingComment(true);
+    setSending(true);
     try {
       await addCommentToPost(post.id, commentText.trim(), null);
       setCommentText("");
     } catch (err) {
       console.error("Fejl ved oprettelse af kommentar:", err);
     } finally {
-      setSendingComment(false);
+      setSending(false);
     }
   }
 
   return (
     <div className="post">
+      {/* HEADER */}
       <div className="post-header">
-        <div className="post-avatar" />
-        <div>
-          <div className="post-author">{authorName}</div>
-          <div className="post-date">{formattedDate}</div>
-        </div>
-      </div>
+      <div className="post-avatar" />
+      <img src="https://placehold.co/40" className="post-avatar" />
 
+      <div className="post-header-info">
+    <span className="post-author">{authorName}</span>
+    {formattedDate && <span className="post-date">{formattedDate}</span>}
+  </div>
+</div>
+
+      {/* TEKST */}
       <p className="post-text">{text}</p>
 
-      <div className="post-actions">
-        <button onClick={handleLike} disabled={liking}>
-          👍 Synes godt om ({likeCount})
+      {/* LIKE + KOMMENTAR I SAMME RÆKKE */}
+      <form className="post-actions-row" onSubmit={handleSubmit}>
+        <button
+          type="button"
+          className="like-btn"
+          onClick={handleLike}
+          disabled={liking}
+        >
+          👍 Synes godt om ({likes})
         </button>
-      </div>
 
-      <div className="post-comments">
-        {comments.length === 0 ? (
-          <p>Ingen kommentarer endnu.</p>
-        ) : (
-          <ul>
-            {comments.map((c) => (
-              <li key={c.id}>
-                <strong>{c.authorId || "Ukendt"}:</strong> {c.text}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <form onSubmit={handleSubmitComment} className="post-comment-form">
         <input
           type="text"
+          className="comment-input-field"
           placeholder="Skriv en kommentar..."
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
         />
-        <button type="submit" disabled={sendingComment}>
-          {sendingComment ? "Sender..." : "Kommentér"}
+
+        <button type="submit" className="comment-btn" disabled={sending}>
+          {sending ? "Sender..." : "Kommentér"}
         </button>
       </form>
+
+      {/* KOMMENTARLISTE */}
+      <div className="comments-list">
+        {comments.length === 0 ? (
+          <p className="no-comments">Ingen kommentarer endnu.</p>
+        ) : (
+          comments.map((c) => (
+            <div key={c.id} className="comment">
+              <strong>{c.authorId || "Bruger"}:</strong> {c.text}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
