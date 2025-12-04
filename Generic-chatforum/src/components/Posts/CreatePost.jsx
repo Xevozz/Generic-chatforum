@@ -1,4 +1,4 @@
-// src/components/Posts/CreatePost.jsx
+// src/components/Posts/CreatePost.js
 
 import { useState } from "react";
 import { createPost } from "src/Services/postsService";

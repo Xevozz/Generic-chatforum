@@ -1,7 +1,7 @@
 import Sidebar from "./Sidebar";
-import PostList from "./Posts/PostList";
-import RightPanel from "./RightPanel";
-import CreatePost from "./Posts/CreatePost";
+import PostList from "src/posts/PostList";
+import RightPanel from "src/RightPanel";
+import CreatePost from "src/posts/CreatePost";
 
 function Layout() {
   return (
