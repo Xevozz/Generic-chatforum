@@ -1,3 +1,5 @@
+// src/components/Layout.jsx
+
 import Sidebar from "./Sidebar";
 import PostList from "./Posts/PostList";
 import RightPanel from "./RightPanel";
@@ -10,7 +12,6 @@ function Layout() {
 
       <div className="feed">
         <CreatePost />
-        
         <PostList />
       </div>
 

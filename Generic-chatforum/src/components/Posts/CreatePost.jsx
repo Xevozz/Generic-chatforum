@@ -1,14 +1,8 @@
-// src/components/Posts/CreatePost.js
+// src/components/Posts/CreatePost.jsx
 
 import { useState } from "react";
-import { createPost } from "../services/postsService";
+import { createPost } from "../../services/postsService.js";
 
-/**
- * CreatePost:
- * - Viser et simpelt tekstfelt + knap
- * - Opretter et nyt dokument i Firestore ("posts")
- * - Bruger createPost fra postsService
- */
 function CreatePost() {
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
@@ -17,7 +11,6 @@ function CreatePost() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Tomt opslag, skal ikke oprettes
     if (!content.trim()) {
       setError("Opslaget må ikke være tomt.");
       return;
@@ -27,10 +20,8 @@ function CreatePost() {
     setError(null);
 
     try {
-      // TODO: når I får auth, kan I sende rigtig user-id med
+      // authorId = null, indtil I kobler auth på
       await createPost(content.trim(), null);
-
-      // Nulstil formular
       setContent("");
     } catch (err) {
       console.error("Fejl ved oprettelse af post:", err);
