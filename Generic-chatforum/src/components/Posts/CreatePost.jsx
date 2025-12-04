@@ -1,7 +1,7 @@
 // src/components/Posts/CreatePost.js
 
 import { useState } from "react";
-import { createPost } from "src/Services/postsService";
+import { createPost } from "../services/postsService";
 
 /**
  * CreatePost:

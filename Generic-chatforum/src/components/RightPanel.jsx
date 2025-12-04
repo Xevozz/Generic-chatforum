@@ -1,3 +1,5 @@
+
+
 function RightPanel() {
     return (
       <aside className="right-panel">

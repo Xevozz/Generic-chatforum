@@ -1,18 +1,16 @@
 import Sidebar from "./Sidebar";
-import PostList from "src/posts/PostList";
-import RightPanel from "src/RightPanel";
-import CreatePost from "src/posts/CreatePost";
+import PostList from "./Posts/PostList";
+import RightPanel from "./RightPanel";
+import CreatePost from "./Posts/CreatePost";
 
 function Layout() {
   return (
     <div className="layout-grid">
       <Sidebar />
-      
-      <div className="feed">
-        {/* Formular til at lave nyt opslag */}
-        <CreatePost />
 
-        {/* Liste med posts hentet fra Firestore */}
+      <div className="feed">
+        <CreatePost />
+        
         <PostList />
       </div>
 
