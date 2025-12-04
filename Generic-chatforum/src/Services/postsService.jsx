@@ -1,6 +1,5 @@
 // src/services/postsService.js
 
-// Alt her handler om ENKELTE posts: kommentarer + likes
 import {
     collection,
     addDoc,
@@ -15,11 +14,22 @@ import {
   import { db } from "../firebaseConfig";
   
   /**
-   * Tilføj en kommentar til et bestemt post
-   * - postId: ID'et fra posts-collection
-   * - text: selve kommentaren
-   * - authorId: kan være null/ukendt hvis I ikke har auth endnu
+   * Opretter et nyt post/opslag i "posts"-collection
+   * - content: selve tekstindholdet (string)
+   * - authorId: valgfrit (kan være null indtil vi har auth)
    */
+  export async function createPost(content, authorId = null) {
+    const postsRef = collection(db, "posts");
+  
+    await addDoc(postsRef, {
+      Content: content,         
+      authorId: authorId,
+      createdAt: serverTimestamp(),
+      likeCount: 0,              // starter med 0 likes
+    });
+  }
+  
+   // Tilføj en kommentar til et bestemt post
   export async function addCommentToPost(postId, text, authorId = null) {
     const commentsRef = collection(db, "posts", postId, "comments");
   
@@ -30,12 +40,9 @@ import {
     });
   }
   
-  /**
-   * Se kommentarer på et post i realtime
-   * - postId: ID'et på post-dokumentet
-   * - callback: funktion der får en liste af kommentarer
-   * Returnerer en unsubscribe-funktion.
-   */
+
+   // Se til kommentarer i realtime
+
   export function listenToComments(postId, callback) {
     const commentsRef = collection(db, "posts", postId, "comments");
     const q = query(commentsRef, orderBy("createdAt", "asc"));
@@ -49,8 +56,7 @@ import {
     });
   }
   
-
-   // likeCount på et post med 1
+   // likeCount med 1
   export async function likePost(postId) {
     const postRef = doc(db, "posts", postId);
   
