@@ -1,10 +1,10 @@
 // src/pages/loginPage.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-// TODO: Importer auth-service / Firebase når I kobler rigtig login på.
+import { loginWithEmailOrUsername } from "../services/authService";
 
 function LoginPage() {
-  const [identifier, setIdentifier] = useState(""); // email eller bruger-id
+  const [identifier, setIdentifier] = useState(""); // email eller brugernavn
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,15 +23,14 @@ function LoginPage() {
     try {
       setLoading(true);
 
-      // TODO: Her skal I kalde jeres rigtige login-funktion
-      // fx: await login(identifier, password);
-      console.log("Logging in with:", { identifier, password });
+      // Rigtigt login-kald
+      await loginWithEmailOrUsername(identifier.trim(), password);
 
-      // Midlertidigt: sender brugeren til forsiden / homePage
+      // Når login lykkes → send til /home (eller hvor jeres feed ligger)
       navigate("/home");
     } catch (err) {
       console.error("Login-fejl:", err);
-      setError("Login mislykkedes. Tjek dine oplysninger.");
+      setError(err.message || "Login mislykkedes. Tjek dine oplysninger.");
     } finally {
       setLoading(false);
     }
@@ -47,7 +46,7 @@ function LoginPage() {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <label>
-            Email eller bruger-ID
+            Email eller brugernavn
             <input
               type="text"
               value={identifier}
@@ -75,7 +74,6 @@ function LoginPage() {
 
         <div className="auth-footer">
           <span>Har du ikke en bruger?</span>
-          {/* Link til opret-bruger siden */}
           <Link to="/create-user" className="auth-link-btn">
             Opret bruger
           </Link>

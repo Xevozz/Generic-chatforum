@@ -15,51 +15,22 @@ function CreateUserPage() {
 
   const navigate = useNavigate();
 
-  // --- Hjælpefunktioner til validering ---
-  // Simpel email-syntax (ikke perfekt, men god nok til klient-side)
-  function isValidEmail(value) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(value);
-  }
-
-  // Password: min 8 tegn, mindst ét bogstav + mindst ét tal
-  function isStrongPassword(value) {
-    if (value.length < 8) return false;
-
-    const hasLetter = /[A-Za-z]/.test(value);
-    const hasDigit = /\d/.test(value);
-
-    return hasLetter && hasDigit;
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
 
-
-    // --- Validering af felter ---
     if (!displayName.trim()) {
       setError("Du skal vælge et brugernavn.");
       return;
     }
-
     if (!email.trim()) {
       setError("Email skal udfyldes.");
       return;
     }
-
-    if (!isValidEmail(email.trim())) {
-      setError("Email ser ikke korrekt ud. Tjek at den er skrevet rigtigt.");
+    if (password.length < 6) {
+      setError("Password skal være mindst 6 tegn.");
       return;
     }
-
-    if (!isStrongPassword(password)) {
-      setError(
-        "Password skal være mindst 8 tegn og indeholde både tal og bogstaver."
-      );
-      return;
-    }
-
     if (password !== password2) {
       setError("Passwords matcher ikke.");
       return;
@@ -68,6 +39,7 @@ function CreateUserPage() {
     try {
       setLoading(true);
 
+      // Rigtigt opret-kald
       await registerUser({
         displayName: displayName.trim(),
         email: email.trim(),
@@ -75,7 +47,7 @@ function CreateUserPage() {
         about: about.trim(),
       });
 
-      // Efter oprettelse → send til login/Homepage
+      // Efter oprettelse → send til login/homepage
       navigate("/login");
     } catch (err) {
       console.error("Opret-bruger-fejl:", err);
@@ -120,7 +92,7 @@ function CreateUserPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mindst 8 tegn, tal + bogstaver"
+              placeholder="Mindst 6 tegn"
             />
           </label>
 
