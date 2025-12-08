@@ -1,7 +1,6 @@
 // src/services/authService.js
 
 // Håndterer login, logout og oprettelse af brugere via Firebase Auth.
-
 import { auth } from "../firebaseConfig";
 import {
   createUserWithEmailAndPassword,
@@ -12,22 +11,21 @@ import {
 } from "firebase/auth";
 import { createUserDocument, getUserByUsername } from "./userService";
 
-/**
- * Opretter en ny bruger:
- * - Firebase Auth (email + password)
- * - Sætter displayName på auth-brugeren
- * - Laver et dokument i Firestore /users/{uid}
- */
+// Opretter en ny bruger:
+// Firebase Auth (email + password)
+// Sætter displayName på auth-brugeren
+// Opretter nu bruger i DB'en /users/{uid}
+
 export async function registerUser({ displayName, email, password, about }) {
   // 1) Opret i Firebase Auth
   const cred = await createUserWithEmailAndPassword(auth, email, password);
 
-  // 2) Sæt displayName på auth-profilen
+  // 2) displayName på auth-profilen
   await updateProfile(cred.user, {
     displayName,
   });
 
-  // 3) Lav Firestore-dokument til ekstra profil-data
+  //Laver en Firestore-dokument (bruger) til ekstra profil-data
   await createUserDocument(cred.user.uid, {
     displayName,
     email,
@@ -37,15 +35,14 @@ export async function registerUser({ displayName, email, password, about }) {
   return cred.user;
 }
 
-/**
- * Login med enten email ELLER brugernavn
- * - Hvis identifier indeholder '@' → behandles som email
- * - Ellers prøver vi at finde en bruger med displayName = identifier
- */
+
+// Login med enten email ELLER brugernavn
+// Hvis identifier indeholder '@' → behandles som email
+// Tjekker for dublikering - prøver at finde en bruger med displayName = identifier
 export async function loginWithEmailOrUsername(identifier, password) {
   let emailToUse = identifier;
 
-  // Hvis der ikke er '@', antager vi at det er et brugernavn
+  // Hvis der ikke er '@', antages at det er et brugernavn
   if (!identifier.includes("@")) {
     const user = await getUserByUsername(identifier);
     if (!user) {
@@ -59,18 +56,15 @@ export async function loginWithEmailOrUsername(identifier, password) {
   return cred.user;
 }
 
-/**
- * Lyt til auth-ændringer (login / logout)
- * Callback får: currentUser eller null
- * Returnerer en unsubscribe-funktion.
- */
+
+// tjekker med auth-ændringer (login / logout)
+// Callback får: currentUser eller null
+// Returnerer en unsubscribe-funktion. (fjerner info fra angiven bruger)
 export function subscribeToAuthChanges(callback) {
   return onAuthStateChanged(auth, callback);
 }
 
-/**
- * Log brugeren ud
- */
+//Logger brugeren ud
 export function logout() {
   return signOut(auth);
 }

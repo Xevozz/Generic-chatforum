@@ -39,7 +39,7 @@ function CreateUserPage() {
     try {
       setLoading(true);
 
-      // Rigtigt opret-kald
+      // Opretter bruger via service
       await registerUser({
         displayName: displayName.trim(),
         email: email.trim(),

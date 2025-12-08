@@ -1,7 +1,6 @@
 // src/services/userService.js
 
-// Service til at arbejde med bruger-dokumenter i Firestore.
-// Her gemmer vi ekstra info om brugeren (displayName, about osv.)
+// Service til at håndtere Bruger-information i DB'en.
 
 import { db } from "../firebaseConfig";
 import {
@@ -16,10 +15,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-/**
- * Opretter / overskriver et bruger-dokument i "users"-samlingen
- * id = authUser.uid
- */
+// Opretter / overskriver en bruger i DB'en
+// bruger id = authUser.uid
 export async function createUserDocument(uid, data) {
   const userRef = doc(db, "users", uid);
 
@@ -30,15 +27,15 @@ export async function createUserDocument(uid, data) {
       updatedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
     },
-    { merge: true } // så vi kan kalde den flere gange uden at slette alt
+    { merge: true } // merger Databasen med dataen så den ikke sletter alt
   );
 
   return userRef;
 }
 
-/**
- * Hent brugerprofil ud fra uid
- */
+
+//Henter brugerprofil ud fra user-id
+
 export async function getUserByUid(uid) {
   const userRef = doc(db, "users", uid);
   const snap = await getDoc(userRef);
@@ -46,9 +43,8 @@ export async function getUserByUid(uid) {
   return { id: snap.id, ...snap.data() };
 }
 
-/**
- * Hent brugerprofil ud fra brugernavn (displayName / username)
- */
+
+//Hent brugerprofil ud fra brugernavn (displayName / username)
 export async function getUserByUsername(username) {
   const usersRef = collection(db, "users");
   const q = query(usersRef, where("displayName", "==", username));
@@ -60,9 +56,7 @@ export async function getUserByUsername(username) {
   return { id: docSnap.id, ...docSnap.data() };
 }
 
-/**
- * Opdater eksisterende brugerprofil
- */
+// Opdatere eksisterende brugerprofil
 export async function updateUserProfile(uid, data) {
   const userRef = doc(db, "users", uid);
   await updateDoc(userRef, {

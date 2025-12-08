@@ -23,10 +23,10 @@ function LoginPage() {
     try {
       setLoading(true);
 
-      // Rigtigt login-kald
+      // Tjekker Log-in kriterier via service
       await loginWithEmailOrUsername(identifier.trim(), password);
 
-      // Når login lykkes → send til /home (eller hvor jeres feed ligger)
+      // Når login lykkes → send til /home
       navigate("/home");
     } catch (err) {
       console.error("Login-fejl:", err);

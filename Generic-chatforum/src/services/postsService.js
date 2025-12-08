@@ -25,9 +25,8 @@ export async function createPost(content, authorId = null) {
   });
 }
 
-/**
- * Tilføj en kommentar til et bestemt post
- */
+
+// Tilføj en kommentar til et bestemt post
 export async function addCommentToPost(postId, text, authorId = null) {
   const commentsRef = collection(db, "posts", postId, "comments");
 
@@ -38,9 +37,8 @@ export async function addCommentToPost(postId, text, authorId = null) {
   });
 }
 
-/**
- * Lyt til kommentarer i realtime
- */
+
+// Lyt til kommentarer i realtime
 export function listenToComments(postId, callback) {
   const commentsRef = collection(db, "posts", postId, "comments");
   const q = query(commentsRef, orderBy("createdAt", "asc"));
@@ -54,9 +52,8 @@ export function listenToComments(postId, callback) {
   });
 }
 
-/**
- * Increment likeCount med 1
- */
+
+// + likeCount med 1
 export async function likePost(postId) {
   const postRef = doc(db, "posts", postId);
 
