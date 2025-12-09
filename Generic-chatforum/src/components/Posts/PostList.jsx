@@ -1,44 +1,26 @@
 // src/components/Posts/PostList.jsx
-
 import { useEffect, useState } from "react";
-import { db } from "../../firebaseConfig";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { listenToAllPosts, listenToPostsByGroup } from "../../services/postsService";
 import Post from "./Post";
 
-function PostList() {
+function PostList({ groupId }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const postsRef = collection(db, "posts");
-    const q = query(postsRef, orderBy("createdAt", "desc"));
+    let unsub;
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const loadedPosts = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPosts(loadedPosts);
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error("Fejl ved hentning af posts:", err);
-        setError("Kunne ikke hente opslag.");
-        setLoading(false);
-      }
-    );
+    if (groupId) {
+      unsub = listenToPostsByGroup(groupId, setPosts);
+    } else {
+      unsub = listenToAllPosts(setPosts);
+    }
 
-    return () => unsubscribe();
-  }, []);
+    return () => unsub();
+  }, [groupId]);
 
-  if (loading) return <p>Henter opslag...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (!posts.length)
-    return <p>Der er endnu ingen opslag. Vær den første til at skrive noget 😄</p>;
+  if (loading && !posts.length) return <p>Henter opslag...</p>;
+  if (!posts.length) return <p>Ingen opslag endnu.</p>;
 
   return (
     <div className="post-list">
