@@ -10,12 +10,12 @@ import {
   onSnapshot,
   doc,
   updateDoc,
-  increment,
   deleteDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
-// Samling for posts
 const postsRef = collection(db, "posts");
 
 
@@ -25,14 +25,17 @@ const postsRef = collection(db, "posts");
 export async function createPost({ content, authorId = null, authorName }) {
   if (!content.trim()) throw new Error("Opslaget må ikke være tomt.");
 
-  const postsRef = collection(db, "posts");
-
   await addDoc(postsRef, {
-    Content: content.trim(),        // du bruger "Content" i dine gamle data
+    // Du bruger i dag feltet "Content" i Firestore,
+    // så vi beholder det for kompatibilitet.
+    Content: content.trim(),
     authorId: authorId || null,
     authorName: authorName || "Ukendt bruger",
+
     createdAt: serverTimestamp(),
-    likeCount: 0,
+
+    // NYT: liste over likes (objekter med userId + displayName)
+    likedBy: [],
   });
 }
 
@@ -54,7 +57,7 @@ export function listenToPosts(callback) {
 
 
 // ======================================================
-// Slet et opslag (til admin)
+// Slet et opslag (til admin – kun brugt hvis du har UI til det)
 // ======================================================
 export async function deletePost(postId) {
   const postRef = doc(db, "posts", postId);
@@ -76,28 +79,33 @@ export async function addCommentToPost(postId, text, authorId = null) {
 }
 
 
-// Se kommentarer i realtime
-
+// ======================================================
+// Lyt til kommentarer i realtime
+// ======================================================
 export function listenToComments(postId, callback) {
   const commentsRef = collection(db, "posts", postId, "comments");
   const q = query(commentsRef, orderBy("createdAt", "asc"));
 
   return onSnapshot(q, (snapshot) => {
-    const comments = snapshot.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
+    const comments = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
     }));
     callback(comments);
   });
 }
 
 
-// +1 like på et opslag
-
-export async function likePost(postId) {
+// ======================================================
+// Toggle like (like / unlike) for en given bruger
+// - hasLiked = true  → fjern like
+// - hasLiked = false → tilføj like
+// ======================================================
+export async function toggleLike(postId, { userId, displayName, hasLiked }) {
   const postRef = doc(db, "posts", postId);
+  const likeObj = { userId, displayName };
 
   await updateDoc(postRef, {
-    likeCount: increment(1),
+    likedBy: hasLiked ? arrayRemove(likeObj) : arrayUnion(likeObj),
   });
 }

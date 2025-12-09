@@ -4,14 +4,12 @@ import { useAuth } from "../../context/AuthContext";
 import {
   addCommentToPost,
   listenToComments,
-  likePost,
-  deletePost,
+  toggleLike,
 } from "../../services/postsService";
 
 function formatDate(value) {
   if (!value) return "";
   if (value.toDate) {
-    // Firestore Timestamp
     return value.toDate().toLocaleString("da-DK");
   }
   if (typeof value === "string") return value;
@@ -22,31 +20,44 @@ function formatDate(value) {
   }
 }
 
+function buildLikesText(likedBy = []) {
+  if (!likedBy.length) return "";
+
+  const names = likedBy.map((l) => l.displayName || "Ukendt bruger");
+  if (names.length === 1) return `${names[0]} synes godt om dette`;
+  if (names.length === 2) return `${names[0]} og ${names[1]} synes godt om dette`;
+  return `${names[0]}, ${names[1]} og ${names.length - 2} andre synes godt om dette`;
+}
+
 function Post({ post }) {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [sending, setSending] = useState(false);
   const [liking, setLiking] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
-  // Auth + profil (til isAdmin mm.)
-  const { profile } = useAuth();
-  const isAdmin = profile?.isAdmin === true;
+  const { user, profile } = useAuth();
 
-  // --- Udregner felter så både "gamle" og "nye" posts virker ---
+  // --- Udregn felter ---
   const authorName =
     post.authorName || post.author || post.authorId || "Ukendt bruger";
 
-  // Tekst kan komme fra Content (nye posts) eller text (gamle)
   const text = post.Content ?? post.content ?? post.text ?? "";
 
-  // Dato: Firestore timestamp
   const formattedDate = formatDate(post.createdAt || post.date);
 
-  // Likes: likeCount (nye) eller likes (gamle)
-  const likes = post.likeCount ?? post.likes ?? 0;
+  const likedBy = post.likedBy || [];
+  const likesCount = likedBy.length;
 
-  // --- Se til kommentarer i realtime ---
+  const currentUserId = user?.uid;
+  const currentUserName = profile?.displayName || user?.email || "Ukendt bruger";
+
+  const hasLiked =
+    !!currentUserId &&
+    likedBy.some((like) => like.userId === currentUserId);
+
+  const likesText = buildLikesText(likedBy);
+
+  // --- Lyt til kommentarer ---
   useEffect(() => {
     if (!post.id) return;
 
@@ -57,12 +68,16 @@ function Post({ post }) {
     return () => unsubscribe();
   }, [post.id]);
 
-  // --- Like et opslag ---
+  // --- Toggle like ---
   async function handleLike() {
-    if (!post.id) return;
+    if (!post.id || !currentUserId) return;
     setLiking(true);
     try {
-      await likePost(post.id);
+      await toggleLike(post.id, {
+        userId: currentUserId,
+        displayName: currentUserName,
+        hasLiked,
+      });
     } catch (err) {
       console.error("Fejl ved like:", err);
     } finally {
@@ -77,7 +92,7 @@ function Post({ post }) {
 
     setSending(true);
     try {
-      await addCommentToPost(post.id, commentText.trim(), null);
+      await addCommentToPost(post.id, commentText.trim(), currentUserId || null);
       setCommentText("");
     } catch (err) {
       console.error("Fejl ved oprettelse af kommentar:", err);
@@ -86,28 +101,10 @@ function Post({ post }) {
     }
   }
 
-  // --- Slet opslag (kun admin) ---
-  async function handleDelete() {
-    if (!isAdmin || !post.id) return;
-    const sure = window.confirm("Er du sikker på, at du vil slette dette opslag?");
-    if (!sure) return;
-
-    try {
-      setDeleting(true);
-      await deletePost(post.id);
-    } catch (err) {
-      console.error("Fejl ved sletning:", err);
-      alert("Kunne ikke slette opslaget. Prøv igen.");
-    } finally {
-      setDeleting(false);
-    }
-  }
-
   return (
     <div className="post">
       {/* HEADER */}
       <div className="post-header">
-        {/* Venstre: avatar + navn + dato */}
         <div className="post-header-left">
           <div className="post-avatar" />
           <div className="post-header-info">
@@ -117,18 +114,6 @@ function Post({ post }) {
             )}
           </div>
         </div>
-
-        {/* Højre: skralde-ikon kun for admin */}
-        {isAdmin && (
-          <button
-            className="post-delete-btn"
-            onClick={handleDelete}
-            disabled={deleting}
-            title="Slet opslag"
-          >
-            🗑
-          </button>
-        )}
       </div>
 
       {/* TEKST */}
@@ -140,23 +125,39 @@ function Post({ post }) {
           type="button"
           className="like-btn"
           onClick={handleLike}
-          disabled={liking}
+          disabled={liking || !currentUserId}
         >
-          👍 Synes godt om ({likes})
+          {hasLiked ? "👎 Fjern like" : "👍 Synes godt om"} ({likesCount})
         </button>
 
         <input
           type="text"
           className="comment-input-field"
-          placeholder="Skriv en kommentar..."
+          placeholder={
+            currentUserId
+              ? "Skriv en kommentar..."
+              : "Log ind for at kommentere"
+          }
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
+          disabled={!currentUserId}
         />
 
-        <button type="submit" className="comment-btn" disabled={sending}>
+        <button
+          type="submit"
+          className="comment-btn"
+          disabled={sending || !currentUserId}
+        >
           {sending ? "Sender..." : "Kommentér"}
         </button>
       </form>
+
+      {/* VIS HVEM DER HAR LIKET */}
+      {likesCount > 0 && (
+        <div className="post-likes-text">
+          {likesText}
+        </div>
+      )}
 
       {/* KOMMENTARLISTE */}
       <div className="comments-list">

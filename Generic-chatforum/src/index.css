@@ -283,6 +283,12 @@ button {
   cursor: pointer;
 }
 
+.post-likes-text {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #555;
+}
+
 .comment-input-field {
   flex: 1;
   padding: 6px 10px;
