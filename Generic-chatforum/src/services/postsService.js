@@ -1,5 +1,5 @@
 // src/services/postsService.js
-// Funktioner til opslag: opret, likes, kommentarer, lytning m.m.
+// Håndtering af opslag: opret, likes, kommentarer + gruppe-understøttelse
 
 import {
   collection,
@@ -13,6 +13,7 @@ import {
   deleteDoc,
   arrayUnion,
   arrayRemove,
+  where,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
@@ -20,28 +21,45 @@ const postsRef = collection(db, "posts");
 
 
 // ======================================================
-// Opret et nyt opslag
+// Opret et nyt opslag (MODAL + HomePage + Gruppe)
 // ======================================================
-export async function createPost({ content, authorId = null, authorName }) {
+export async function createPost({ 
+  title = "",
+  content, 
+  authorId = null, 
+  authorName, 
+  groupId = null 
+}) {
+
   if (!content.trim()) throw new Error("Opslaget må ikke være tomt.");
 
+  // Gør kompatibel med gamle komponenter (som læser Content-feltet)
+  const combinedText = title
+    ? `${title}\n\n${content}` 
+    : content;
+
   await addDoc(postsRef, {
-    // Du bruger i dag feltet "Content" i Firestore,
-    // så vi beholder det for kompatibilitet.
-    Content: content.trim(),
+    // Beholder dette for COMPATIBILITY med ældre UI:
+    Content: combinedText.trim(),
+
+    // Nyere UI læser også dette:
+    title: title || null,
+    content: content.trim(),
+
     authorId: authorId || null,
     authorName: authorName || "Ukendt bruger",
 
+    groupId: groupId || null,   // ⭐ vigtig for gruppe-funktionen
     createdAt: serverTimestamp(),
 
-    // NYT: liste over likes (objekter med userId + displayName)
-    likedBy: [],
+    likedBy: [], // beholdt for like-systemet
   });
 }
 
 
+
 // ======================================================
-// Lyt til ALLE opslag i realtime (til forsiden)
+// Lyt til ALLE opslag (forsiden)
 // ======================================================
 export function listenToPosts(callback) {
   const q = query(postsRef, orderBy("createdAt", "desc"));
@@ -56,8 +74,31 @@ export function listenToPosts(callback) {
 }
 
 
+
 // ======================================================
-// Slet et opslag (til admin – kun brugt hvis du har UI til det)
+// Lyt kun til opslag i en specifik gruppe
+// ======================================================
+export function listenToPostsByGroup(groupId, callback) {
+
+  const q = query(
+    postsRef,
+    where("groupId", "==", groupId),
+    orderBy("createdAt", "desc")
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const posts = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+    callback(posts);
+  });
+}
+
+
+
+// ======================================================
+// Slet et opslag (kun hvis I har UI for det)
 // ======================================================
 export async function deletePost(postId) {
   const postRef = doc(db, "posts", postId);
@@ -65,8 +106,9 @@ export async function deletePost(postId) {
 }
 
 
+
 // ======================================================
-// Tilføj en kommentar til et bestemt post
+// Tilføj kommentar
 // ======================================================
 export async function addCommentToPost(postId, text, authorId = null) {
   const commentsRef = collection(db, "posts", postId, "comments");
@@ -79,8 +121,9 @@ export async function addCommentToPost(postId, text, authorId = null) {
 }
 
 
+
 // ======================================================
-// Lyt til kommentarer i realtime
+// Lyt til kommentarer
 // ======================================================
 export function listenToComments(postId, callback) {
   const commentsRef = collection(db, "posts", postId, "comments");
@@ -96,10 +139,9 @@ export function listenToComments(postId, callback) {
 }
 
 
+
 // ======================================================
-// Toggle like (like / unlike) for en given bruger
-// - hasLiked = true  → fjern like
-// - hasLiked = false → tilføj like
+// LIKE / UNLIKE — understøtter arrayUnion + arrayRemove
 // ======================================================
 export async function toggleLike(postId, { userId, displayName, hasLiked }) {
   const postRef = doc(db, "posts", postId);
