@@ -1,21 +1,30 @@
-
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { listenToGroups } from "../services/groupService";
 
 function Sidebar() {
+  const [groups, setGroups] = useState([]);
+
+  useEffect(() => {
+    const unsub = listenToGroups((loadedGroups) => {
+      setGroups(loadedGroups);
+    });
+    return () => unsub();
+  }, []);
+
   return (
     <aside className="sidebar">
-      <h3>Chat Forum</h3>
+      <h3>Grupper</h3>
       <ul>
-        <li>Alle opslag</li>
-        <li>Gruppe 1</li>
-        <li>Gruppe 2</li>
-        <li>Gruppe 3</li>
-      </ul>
+        <li>
+          <Link to="/home">Alle opslag</Link>
+        </li>
 
-      <h3>P Chat</h3>
-      <ul>
-        <li>Chat 1</li>
-        <li>Chat 2</li>
-        <li>Chat 3</li>
+        {groups.map((g) => (
+          <li key={g.id}>
+            <Link to={`/group/${g.id}`}>{g.name}</Link>
+          </li>
+        ))}
       </ul>
     </aside>
   );

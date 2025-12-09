@@ -40,3 +40,116 @@
 .read-the-docs {
   color: #888;
 }
+
+
+/* ===== Modal Overlay ===== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* ===== Modal Window ===== */
+.modal {
+  background: #fff;
+  width: 70%;
+  max-width: 900px;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  animation: modalFadeIn 0.25s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Fade/Pop-in animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Modal Inputs ===== */
+.modal input,
+.modal textarea,
+.modal select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #fafafa;
+}
+
+.modal textarea {
+  min-height: 220px; /* Stor som screenshot 2 */
+  resize: vertical;
+}
+
+/* ===== Buttons Row ===== */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-buttons button {
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Close-btn (Luk) */
+.modal-buttons button:first-child {
+  background: #eee;
+  border: 1px solid #bbb;
+}
+
+/* Create-btn (Opret) */
+.modal-buttons button:last-child {
+  background: #2c87f0;
+  border: 1px solid #1e6bd6;
+  color: white;
+  font-weight: bold;
+}
+
+.modal-buttons button:last-child:hover {
+  background: #1e6bd6;
+}
+
+/* Fejlbesked i modal */
+.modal-error {
+  color: #d93025;          /* Google-red */
+  background: #fde8e7;     /* Lys rød baggrund */
+  border: 1px solid #f5b5b2;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 10px;
+  text-align: center;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Lidt fade-in animation (valgfrit) */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

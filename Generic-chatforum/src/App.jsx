@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/loginPage";
 import CreateUserPage from "./pages/createUser";
 import HomePage from "./pages/homePage";
+import GroupPage from "./pages/groupPage";
 import "./App.css";
 
 function App() {
@@ -22,6 +23,8 @@ function App() {
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
+
+        <Route path="/group/:groupId" element={<GroupPage />} />
       </Routes>
     </BrowserRouter>
   );

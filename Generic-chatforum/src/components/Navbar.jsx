@@ -1,9 +1,11 @@
-
-
+// src/components/Navbar.jsx
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import CreatePostModal from "./CreatePostModal";
 
-function Navbar() {
+function Navbar({ pageTitle = "Alle opslag" }) {
+  const [isOpen, setOpen] = useState(false);
   const navigate = useNavigate();
   const { user, profile, logout } = useAuth();
 
@@ -17,30 +19,50 @@ function Navbar() {
   }
 
   return (
-    <header className="navbar">
-      {/* Venstre – titel */}
-      <div className="navbar-left">
-        <span className="navbar-app-title">Chat Forum</span>
-      </div>
+    <>
+      <header className="navbar">
+        {/* Left side */}
+        <div className="navbar-left">
+          <span className="navbar-app-title">Chat Forum</span>
+        </div>
 
-      {/* Midten – din søgning / “Alle opslag” osv. (kan være som før) */}
-      <div className="navbar-center">
-        {/* ... eksisterende søgefelt + fane ... */}
-      </div>
+        {/* Center: search + page title */}
+        <div className="navbar-center">
+          <input className="navbar-search" placeholder="Søgefelt" />
+          <div className="navbar-page-title">{pageTitle}</div>
+        </div>
 
-      {/* Højre – brugernavn + knap */}
-      <div className="navbar-right">
-        {profile && (
-          <span className="navbar-username">
-            {profile.displayName || user.email}
-          </span>
-        )}
+        {/* Right side */}
+        <div className="navbar-right">
+          {profile && (
+            <span className="navbar-username">
+              {profile.displayName || user.email}
+            </span>
+          )}
 
-        <button className="btn btn-primary" onClick={handleLoginLogout}>
-          {user ? "Log ud" : "Log ind"}
-        </button>
-      </div>
-    </header>
+          {/* Create Post button */}
+          {user && (
+            <button
+              className="btn btn-outline"
+              onClick={() => setOpen(true)}
+            >
+              Lav opslag
+            </button>
+          )}
+
+          {/* Login/Logout button */}
+          <button className="btn btn-primary" onClick={handleLoginLogout}>
+            {user ? "Log ud" : "Log ind"}
+          </button>
+        </div>
+      </header>
+
+      {/* Modal */}
+      <CreatePostModal
+        isOpen={isOpen}
+        onClose={() => setOpen(false)}
+      />
+    </>
   );
 }
 
