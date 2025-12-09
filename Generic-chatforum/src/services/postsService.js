@@ -1,6 +1,6 @@
 // src/services/postsService.js
+// Funktioner til opslag: opret, likes, kommentarer, lytning m.m.
 
-// Firestore funktioner
 import {
   collection,
   addDoc,
@@ -11,22 +11,60 @@ import {
   doc,
   updateDoc,
   increment,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
-export async function createPost(content, authorId = null) {
+// Samling for posts
+const postsRef = collection(db, "posts");
+
+
+// ======================================================
+// Opret et nyt opslag
+// ======================================================
+export async function createPost({ content, authorId = null, authorName }) {
+  if (!content.trim()) throw new Error("Opslaget må ikke være tomt.");
+
   const postsRef = collection(db, "posts");
 
   await addDoc(postsRef, {
-    Content: content,
-    authorId,
+    Content: content.trim(),        // du bruger "Content" i dine gamle data
+    authorId: authorId || null,
+    authorName: authorName || "Ukendt bruger",
     createdAt: serverTimestamp(),
     likeCount: 0,
   });
 }
 
 
+// ======================================================
+// Lyt til ALLE opslag i realtime (til forsiden)
+// ======================================================
+export function listenToPosts(callback) {
+  const q = query(postsRef, orderBy("createdAt", "desc"));
+
+  return onSnapshot(q, (snapshot) => {
+    const posts = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+    callback(posts);
+  });
+}
+
+
+// ======================================================
+// Slet et opslag (til admin)
+// ======================================================
+export async function deletePost(postId) {
+  const postRef = doc(db, "posts", postId);
+  await deleteDoc(postRef);
+}
+
+
+// ======================================================
 // Tilføj en kommentar til et bestemt post
+// ======================================================
 export async function addCommentToPost(postId, text, authorId = null) {
   const commentsRef = collection(db, "posts", postId, "comments");
 
@@ -38,22 +76,24 @@ export async function addCommentToPost(postId, text, authorId = null) {
 }
 
 
-// Lyt til kommentarer i realtime
+// Se kommentarer i realtime
+
 export function listenToComments(postId, callback) {
   const commentsRef = collection(db, "posts", postId, "comments");
   const q = query(commentsRef, orderBy("createdAt", "asc"));
 
   return onSnapshot(q, (snapshot) => {
-    const comments = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
+    const comments = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
     }));
     callback(comments);
   });
 }
 
 
-// + likeCount med 1
+// +1 like på et opslag
+
 export async function likePost(postId) {
   const postRef = doc(db, "posts", postId);
 

@@ -201,24 +201,44 @@ button {
 
 .post-header {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.post-header-left {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .post-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  background: #ddd;
+}
+
+.post-header-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .post-author {
-  font-weight: bold;
+  font-weight: 600;
 }
 
-.post-actions {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
+.post-date {
+  font-size: 12px;
+  color: #777;
+}
+
+.post-delete-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
 }
 
 /* ===== CreatePost ===== */

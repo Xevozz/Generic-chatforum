@@ -1,36 +1,52 @@
 // src/components/Posts/Post.jsx
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import {
   addCommentToPost,
   listenToComments,
   likePost,
-} from "../../services/postsService.js";
+  deletePost,
+} from "../../services/postsService";
+
+function formatDate(value) {
+  if (!value) return "";
+  if (value.toDate) {
+    // Firestore Timestamp
+    return value.toDate().toLocaleString("da-DK");
+  }
+  if (typeof value === "string") return value;
+  try {
+    return new Date(value).toLocaleString("da-DK");
+  } catch {
+    return "";
+  }
+}
 
 function Post({ post }) {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [sending, setSending] = useState(false);
   const [liking, setLiking] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // --- Udregn felter så både "gamle" og "nye" posts virker ---
+  // Auth + profil (til isAdmin mm.)
+  const { profile } = useAuth();
+  const isAdmin = profile?.isAdmin === true;
+
+  // --- Udregner felter så både "gamle" og "nye" posts virker ---
   const authorName =
     post.authorName || post.author || post.authorId || "Ukendt bruger";
 
   // Tekst kan komme fra Content (nye posts) eller text (gamle)
   const text = post.Content ?? post.content ?? post.text ?? "";
 
-  // Dato: Firestore timestamp eller en allerede formateret streng
-  let formattedDate = "";
-  if (post.createdAt?.toDate) {
-    formattedDate = post.createdAt.toDate().toLocaleString();
-  } else if (post.date) {
-    formattedDate = post.date;
-  }
+  // Dato: Firestore timestamp
+  const formattedDate = formatDate(post.createdAt || post.date);
 
   // Likes: likeCount (nye) eller likes (gamle)
   const likes = post.likeCount ?? post.likes ?? 0;
 
-  // --- Lyt til kommentarer i realtime ---
+  // --- Se til kommentarer i realtime ---
   useEffect(() => {
     if (!post.id) return;
 
@@ -70,18 +86,50 @@ function Post({ post }) {
     }
   }
 
+  // --- Slet opslag (kun admin) ---
+  async function handleDelete() {
+    if (!isAdmin || !post.id) return;
+    const sure = window.confirm("Er du sikker på, at du vil slette dette opslag?");
+    if (!sure) return;
+
+    try {
+      setDeleting(true);
+      await deletePost(post.id);
+    } catch (err) {
+      console.error("Fejl ved sletning:", err);
+      alert("Kunne ikke slette opslaget. Prøv igen.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="post">
       {/* HEADER */}
       <div className="post-header">
-      <div className="post-avatar" />
-      <img src="https://placehold.co/40" className="post-avatar" />
+        {/* Venstre: avatar + navn + dato */}
+        <div className="post-header-left">
+          <div className="post-avatar" />
+          <div className="post-header-info">
+            <span className="post-author">{authorName}</span>
+            {formattedDate && (
+              <span className="post-date">{formattedDate}</span>
+            )}
+          </div>
+        </div>
 
-      <div className="post-header-info">
-    <span className="post-author">{authorName}</span>
-    {formattedDate && <span className="post-date">{formattedDate}</span>}
-  </div>
-</div>
+        {/* Højre: skralde-ikon kun for admin */}
+        {isAdmin && (
+          <button
+            className="post-delete-btn"
+            onClick={handleDelete}
+            disabled={deleting}
+            title="Slet opslag"
+          >
+            🗑
+          </button>
+        )}
+      </div>
 
       {/* TEKST */}
       <p className="post-text">{text}</p>
