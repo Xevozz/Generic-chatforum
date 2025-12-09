@@ -160,17 +160,22 @@ function Post({ post }) {
       )}
 
       {/* KOMMENTARLISTE */}
-      <div className="comments-list">
-        {comments.length === 0 ? (
-          <p className="no-comments">Ingen kommentarer endnu.</p>
-        ) : (
-          comments.map((c) => (
-            <div key={c.id} className="comment">
-              <strong>{c.authorId || "Bruger"}:</strong> {c.text}
-            </div>
-          ))
-        )}
-      </div>
+        <div className="comments-section">
+            {comments.length === 0 ? (
+            <p className="no-comments">Ingen kommentarer endnu.</p>
+            ) : (
+            comments.map((c) => (
+          <div key={c.id} className="comment-box">
+              <div className="comment-author">
+                {c.authorId || "Bruger"}
+              </div>
+              <div className="comment-text">
+                {c.text}
+              </div>
+          </div>
+        ))
+      )}
+    </div>
     </div>
   );
 }

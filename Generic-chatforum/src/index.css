@@ -268,89 +268,107 @@ button {
 
 /* ===== Post + Comment ===== */
 
-.post-actions-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.like-btn {
+.post {
   background: #fff;
-  border: 1px solid #ccc;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
-.post-likes-text {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #555;
-}
-
-.comment-input-field {
-  flex: 1;
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.comment-btn {
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.comments-list {
-  margin-top: 12px;
-}
-
-.comment {
-  padding: 4px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.no-comments {
-  color: #666;
-  font-size: 14px;
-}
-
-post-header {
+.post-header {
   display: flex;
-  justify-content: space-between;   /* VENSTRE / HØJRE */
   align-items: center;
   margin-bottom: 10px;
-}
-
-/* Venstre del — avatar + navn */
-.post-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .post-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  margin-right: 10px;
+}
+
+.post-header-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .post-author {
-  font-weight: bold;
-  font-size: 16px;
+  font-weight: 600;
 }
 
-/* Højre del — timestamp */
-.post-timestamp {
-  font-size: 14px;
-  color: #666;
+.post-date {
+  font-size: 12px;
+  color: #777;
 }
 
-/* Post tekst */
 .post-text {
-  margin: 10px 0;
+  padding: 10px 0 15px;
   font-size: 16px;
+}
+
+.post-action-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 15px;
+}
+
+.like-btn {
+  background: #f5f5f5;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.comment-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.comment-username {
+  font-weight: 600;
+}
+
+.comment-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.comment-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #ddd;
+  border: none;
+  cursor: pointer;
+}
+
+.comments-container {
+  margin-top: 15px;
+}
+
+.comment-block {
+  background: #f7f7f7;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.comment-author {
+  font-weight: 600;
+}
+
+.no-comments {
+  color: #777;
+  font-size: 14px;
 }
 
 /* ===== AUTH PAGES (login + opret bruger) ===== */
