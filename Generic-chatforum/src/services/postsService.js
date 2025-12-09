@@ -61,7 +61,7 @@ export async function createPost({
 // ======================================================
 // Lyt til ALLE opslag (forsiden)
 // ======================================================
-export function listenToPosts(callback) {
+export function listenToAllPosts(callback) {
   const q = query(postsRef, orderBy("createdAt", "desc"));
 
   return onSnapshot(q, (snapshot) => {
