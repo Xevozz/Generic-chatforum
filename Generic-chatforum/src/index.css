@@ -43,3 +43,42 @@ h1 {
 button {
   font-family: inherit;
 }
+
+/* ===== Log ud-knap (rød) ===== */
+.btn-logout {
+  background: #e84545;
+  border-color: #c4302f;
+  color: #fff;
+}
+
+.btn-logout:hover {
+  background: #c4302f;
+}
+
+/* ===== CreatePost – submit-knap ===== */
+.create-post-submit {
+  padding: 8px 18px;
+  border-radius: 999px;          /* pill-shape */
+  border: none;
+  background: #2563eb;           /* blå */
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  transition: background 0.15s ease, transform 0.1s ease,
+              box-shadow 0.15s ease;
+}
+
+.create-post-submit:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+}
+
+.create-post-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}

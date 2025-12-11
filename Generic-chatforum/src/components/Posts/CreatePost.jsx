@@ -60,7 +60,11 @@ function CreatePost() {
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <button type="submit" disabled={saving}>
+      <button
+        type="submit"
+        className="create-post-submit"
+        disabled={saving}
+      >
         {saving ? "Opretter..." : "Opret opslag"}
       </button>
     </form>
