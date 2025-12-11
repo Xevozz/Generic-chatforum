@@ -41,21 +41,36 @@ function Post({ post }) {
   const authorName =
     post.authorName || post.author || post.authorId || "Ukendt bruger";
 
-  const text = post.Content ?? post.content ?? post.text ?? "";
-
   const formattedDate = formatDate(post.createdAt || post.date);
 
   const likedBy = post.likedBy || [];
   const likesCount = likedBy.length;
 
   const currentUserId = user?.uid;
-  const currentUserName = profile?.displayName || user?.email || "Ukendt bruger";
+  const currentUserName =
+    profile?.displayName || user?.email || "Ukendt bruger";
 
   const hasLiked =
     !!currentUserId &&
     likedBy.some((like) => like.userId === currentUserId);
 
   const likesText = buildLikesText(likedBy);
+
+  // --- Titel + brødtekst (ny struktur) ---
+  const legacyContent = post.Content || "";
+
+  const title =
+    post.title ||
+    (legacyContent ? legacyContent.split("\n\n")[0] : "");
+
+  const body =
+    post.content ||
+    (legacyContent
+      ? legacyContent.split("\n\n").slice(1).join("\n\n")
+      : "");
+
+  const hasTitle = !!title?.trim();
+  const hasBody = !!body?.trim();
 
   // --- Lyt til kommentarer ---
   useEffect(() => {
@@ -116,8 +131,11 @@ function Post({ post }) {
         </div>
       </div>
 
-      {/* TEKST */}
-      <p className="post-text">{text}</p>
+      {/* TEKST: titel + beskrivelse */}
+      <div className="post-text">
+        {hasTitle && <h3 className="post-title">{title}</h3>}
+        {hasBody && <p className="post-body">{body}</p>}
+      </div>
 
       {/* LIKE + KOMMENTAR I SAMME RÆKKE */}
       <form className="post-actions-row" onSubmit={handleSubmit}>
@@ -154,28 +172,24 @@ function Post({ post }) {
 
       {/* VIS HVEM DER HAR LIKET */}
       {likesCount > 0 && (
-        <div className="post-likes-text">
-          {likesText}
-        </div>
+        <div className="post-likes-text">{likesText}</div>
       )}
 
       {/* KOMMENTARLISTE */}
-        <div className="comments-section">
-            {comments.length === 0 ? (
-            <p className="no-comments">Ingen kommentarer endnu.</p>
-            ) : (
-            comments.map((c) => (
-          <div key={c.id} className="comment-box">
+      <div className="comments-section">
+        {comments.length === 0 ? (
+          <p className="no-comments">Ingen kommentarer endnu.</p>
+        ) : (
+          comments.map((c) => (
+            <div key={c.id} className="comment-box">
               <div className="comment-author">
                 {c.authorId || "Bruger"}
               </div>
-              <div className="comment-text">
-                {c.text}
-              </div>
-          </div>
-        ))
-      )}
-    </div>
+              <div className="comment-text">{c.text}</div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }

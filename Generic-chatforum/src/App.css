@@ -309,6 +309,26 @@
   font-size: 14px;
 }
 
+.post-text {
+  padding: 6px 0 10px;
+  font-size: 14px;
+}
+
+.post-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.post-body {
+  margin: 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  white-space: pre-line; /* bevarer linjeskift i beskrivelsen */
+}
+
 /* Like + kommentarrække */
 
 .post-actions-row {
