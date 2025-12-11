@@ -25,31 +25,32 @@ function PostList({ groupId, searchQuery = "" }) {
     return () => unsub && unsub();
   }, [groupId]);
 
-  // ---- NYT: SØGEFILTER ----
-  const q = searchQuery.trim().toLowerCase();
+  // 🔍 filtrér på titel/tekst/forfatter – UDEN at fjerne noget af dit eksisterende
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  const filteredPosts = q
-    ? posts.filter((p) => {
-        const text =
-          (p.title || "") +
-          " " +
-          (p.content || "") +
-          " " +
-          (p.Content || ""); // Du havde begge varianter i DB
-        return text.toLowerCase().includes(q);
-      })
-    : posts;
+  const visiblePosts =
+    normalizedQuery.length === 0
+      ? posts
+      : posts.filter((p) => {
+          const title = (p.title || "").toLowerCase();
+          const content =
+            (p.content || p.Content || p.text || "").toLowerCase();
+          const author =
+            (p.authorName || p.author || p.authorId || "").toLowerCase();
 
-  // ---- Rendering ----
+          return (
+            title.includes(normalizedQuery) ||
+            content.includes(normalizedQuery) ||
+            author.includes(normalizedQuery)
+          );
+        });
+
   if (loading && !posts.length) return <p>Henter opslag...</p>;
-  if (!filteredPosts.length) {
-    if (q) return <p>Ingen opslag matcher din søgning.</p>;
-    return <p>Ingen opslag endnu.</p>;
-  }
+  if (!visiblePosts.length) return <p>Ingen opslag matcher din søgning.</p>;
 
   return (
     <div className="post-list">
-      {filteredPosts.map((p) => (
+      {visiblePosts.map((p) => (
         <Post key={p.id} post={p} />
       ))}
     </div>

@@ -13,6 +13,9 @@ function GroupPage() {
   const { groupId } = useParams();
   const [group, setGroup] = useState(null);
 
+  // 🔍 lokal søge-state for denne gruppe-side
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Hent gruppens data (navn osv.) ud fra URL'ens groupId
   useEffect(() => {
     if (!groupId) return;
@@ -33,8 +36,12 @@ function GroupPage() {
 
   return (
     <div>
-      {/* Topbar – viser gruppenavn i midten */}
-      <Navbar pageTitle={title} />
+      {/* Topbar – viser gruppenavn i midten + søgefelt styres herfra */}
+      <Navbar
+        pageTitle={title}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       {/* Samme 3-kolonne layout som på forsiden */}
       <div className="layout-grid">
@@ -44,8 +51,8 @@ function GroupPage() {
           {/* Ekstra overskrift inde i selve feedet (valgfri) */}
           <h2>{title}</h2>
 
-          {/* Viser kun opslag fra denne gruppe */}
-          <PostList groupId={groupId} />
+          {/* Viser kun opslag fra denne gruppe + filtrerer på søgning */}
+          <PostList groupId={groupId} searchQuery={searchQuery} />
         </div>
 
         <RightPanel />

@@ -11,7 +11,6 @@ function Layout({ searchQuery = "" }) {
 
       <div className="feed">
         <CreatePost />
-        {/* ⬇️ send søgeteksten videre til PostList */}
         <PostList searchQuery={searchQuery} />
       </div>
 
