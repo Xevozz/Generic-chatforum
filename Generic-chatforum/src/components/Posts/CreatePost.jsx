@@ -1,44 +1,66 @@
 // src/components/Posts/CreatePost.jsx
 
-import { useState } from "react";
-import { createPost } from "../../services/postsService.js";
-import { useAuth } from "../../context/AuthContext"; // <-- ny import
+import { useState, useEffect } from "react";
+import { createPost } from "../../services/postsService";
+import { listenToGroups } from "../../services/groupService";
+import { useAuth } from "../../context/AuthContext";
 
 function CreatePost() {
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  // Hent nuværende bruger + profil (displayName, isAdmin osv.)
   const { user, profile } = useAuth();
+
+  // Hent grupper til dropdown
+  useEffect(() => {
+    const unsub = listenToGroups((loadedGroups) => {
+      setGroups(loadedGroups);
+    });
+    return () => unsub();
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setError(null);
 
-    // 1) Tjek om der er tekst
-    if (!content.trim()) {
-      setError("Opslaget må ikke være tomt.");
-      return;
+    if (!title.trim()) {
+      return setError("Du skal skrive en overskrift.");
     }
-
-    // 2) Tjek om bruger er logget ind
+    if (title.trim().length < 3) {
+      return setError("Overskriften skal være mindst 3 tegn.");
+    }
+    if (!content.trim()) {
+      return setError("Du skal skrive en beskrivelse.");
+    }
+    if (content.trim().length < 10) {
+      return setError("Beskrivelsen skal være mindst 10 tegn.");
+    }
+    if (!selectedGroup) {
+      return setError("Du skal vælge en gruppe.");
+    }
     if (!user) {
-      setError("Du skal være logget ind for at oprette et opslag.");
-      return;
+      return setError("Du skal være logget ind for at oprette et opslag.");
     }
 
     setSaving(true);
-    setError(null);
 
     try {
-      // 3) Brug den nye createPost-signatur (objekt)
       await createPost({
+        title: title.trim(),
         content: content.trim(),
+        groupId: selectedGroup,
         authorId: user.uid,
         authorName: profile?.displayName || user.email,
       });
 
+      // Nulstil felter
+      setTitle("");
       setContent("");
+      setSelectedGroup("");
     } catch (err) {
       console.error("Fejl ved oprettelse af post:", err);
       setError("Noget gik galt. Prøv igen.");
@@ -51,6 +73,16 @@ function CreatePost() {
     <form onSubmit={handleSubmit} className="create-post">
       <h3>Lav nyt opslag</h3>
 
+      {/* Titel */}
+      <input
+        type="text"
+        placeholder="Overskrift"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        style={{ marginBottom: "6px" }}
+      />
+
+      {/* Beskrivelse */}
       <textarea
         placeholder="Hvad vil du dele?"
         value={content}
@@ -58,15 +90,33 @@ function CreatePost() {
         rows={3}
       />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <button
-        type="submit"
-        className="create-post-submit"
-        disabled={saving}
+      {/* Vælg gruppe */}
+      <select
+        value={selectedGroup}
+        onChange={(e) => setSelectedGroup(e.target.value)}
+        style={{ marginTop: "6px" }}
       >
-        {saving ? "Opretter..." : "Opret opslag"}
-      </button>
+        <option value="">Vælg gruppe...</option>
+        {groups.map((g) => (
+          <option key={g.id} value={g.id}>
+            {g.name}
+          </option>
+        ))}
+      </select>
+
+      {error && (
+        <p style={{ color: "red", marginTop: "6px", fontSize: "14px" }}>
+          {error}
+        </p>
+      )}
+
+            <button
+          type="submit"
+          disabled={saving}
+          className="create-post-submit"
+        >
+  {saving ? "Opretter..." : "Opret opslag"}
+</button>
     </form>
   );
 }

@@ -50,8 +50,11 @@ function Navbar({ pageTitle = "Alle opslag" }) {
             </button>
           )}
 
-          {/* Login/Logout button */}
-          <button className="btn btn-primary" onClick={handleLoginLogout}>
+          {/* Login/Logout button — now red when logged in */}
+          <button
+            className={`btn ${user ? "btn-logout" : "btn-primary"}`}
+            onClick={handleLoginLogout}
+          >
             {user ? "Log ud" : "Log ind"}
           </button>
         </div>
