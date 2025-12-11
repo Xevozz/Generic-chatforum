@@ -4,7 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import CreatePostModal from "./CreatePostModal";
 
-function Navbar({ pageTitle = "Alle opslag" }) {
+function Navbar({
+  pageTitle = "Alle opslag",
+  searchQuery = "",
+  onSearchChange,
+}) {
   const [isOpen, setOpen] = useState(false);
   const navigate = useNavigate();
   const { user, profile, logout } = useAuth();
@@ -28,7 +32,14 @@ function Navbar({ pageTitle = "Alle opslag" }) {
 
         {/* Center: search + page title */}
         <div className="navbar-center">
-          <input className="navbar-search" placeholder="Søgefelt" />
+          <input
+            className="navbar-search"
+            placeholder="Søgefelt"
+            value={searchQuery}
+            onChange={(e) =>
+              onSearchChange ? onSearchChange(e.target.value) : null
+            }
+          />
           <div className="navbar-page-title">{pageTitle}</div>
         </div>
 
@@ -42,15 +53,12 @@ function Navbar({ pageTitle = "Alle opslag" }) {
 
           {/* Create Post button */}
           {user && (
-            <button
-              className="btn btn-outline"
-              onClick={() => setOpen(true)}
-            >
+            <button className="btn btn-outline" onClick={() => setOpen(true)}>
               Lav opslag
             </button>
           )}
 
-          {/* Login/Logout button — now red when logged in */}
+          {/* Login/Logout button — nu rød når man er logget ind */}
           <button
             className={`btn ${user ? "btn-logout" : "btn-primary"}`}
             onClick={handleLoginLogout}
@@ -61,10 +69,7 @@ function Navbar({ pageTitle = "Alle opslag" }) {
       </header>
 
       {/* Modal */}
-      <CreatePostModal
-        isOpen={isOpen}
-        onClose={() => setOpen(false)}
-      />
+      <CreatePostModal isOpen={isOpen} onClose={() => setOpen(false)} />
     </>
   );
 }
