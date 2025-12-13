@@ -25,25 +25,19 @@ function Navbar({
   return (
     <>
       <header className="navbar">
-        {/* Left side */}
+        {/* Left */}
         <div className="navbar-left">
           <span className="navbar-app-title">Chat Forum</span>
         </div>
 
-        {/* Center: search + page title */}
+        {/* Center: kun titel */}
         <div className="navbar-center">
-          <input
-            className="navbar-search"
-            placeholder="Søgefelt"
-            value={searchQuery}
-            onChange={(e) =>
-              onSearchChange ? onSearchChange(e.target.value) : null
-            }
-          />
-          <div className="navbar-page-title">{pageTitle}</div>
+          <div className="navbar-page-title navbar-page-title--big">
+            {pageTitle}
+          </div>
         </div>
 
-        {/* Right side */}
+        {/* Right: username + søg + knapper */}
         <div className="navbar-right">
           {profile && (
             <span className="navbar-username">
@@ -51,14 +45,21 @@ function Navbar({
             </span>
           )}
 
-          {/* Create Post button */}
+          <input
+            className="navbar-search navbar-search--right"
+            placeholder="Søg i opslag…"
+            value={searchQuery}
+            onChange={(e) =>
+              onSearchChange ? onSearchChange(e.target.value) : null
+            }
+          />
+
           {user && (
             <button className="btn btn-outline" onClick={() => setOpen(true)}>
               Lav opslag
             </button>
           )}
 
-          {/* Login/Logout button — nu rød når man er logget ind */}
           <button
             className={`btn ${user ? "btn-logout" : "btn-primary"}`}
             onClick={handleLoginLogout}
@@ -68,7 +69,6 @@ function Navbar({
         </div>
       </header>
 
-      {/* Modal */}
       <CreatePostModal isOpen={isOpen} onClose={() => setOpen(false)} />
     </>
   );
