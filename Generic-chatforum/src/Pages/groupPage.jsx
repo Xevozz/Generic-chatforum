@@ -14,6 +14,9 @@ function GroupPage() {
   const { groupId } = useParams();
   const [group, setGroup] = useState(null);
 
+  // ✅ NYT: søgefelt-state til gruppesiden
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     if (!groupId) return;
 
@@ -29,23 +32,28 @@ function GroupPage() {
     return () => unsub();
   }, [groupId]);
 
+
+  useEffect(() => {
+    setSearchQuery("");
+  }, [groupId]);
+
   const title = group?.name || "Gruppe";
 
   return (
     <div>
-      
-      <Navbar pageTitle={title} />
+      <Navbar
+        pageTitle={title}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
-      
       <div className="layout-grid">
         <Sidebar />
 
         <div className="feed">
-        
           <CreatePost fixedGroupId={groupId} hideGroupSelector />
 
-        
-          <PostList groupId={groupId} />
+          <PostList groupId={groupId} searchQuery={searchQuery} />
         </div>
 
         <RightPanel />
