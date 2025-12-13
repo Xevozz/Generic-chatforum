@@ -8,15 +8,12 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import RightPanel from "../components/RightPanel";
 import PostList from "../components/Posts/PostList";
+import CreatePost from "../components/Posts/CreatePost";
 
 function GroupPage() {
   const { groupId } = useParams();
   const [group, setGroup] = useState(null);
 
-  // 🔍 lokal søge-state for denne gruppe-side
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Hent gruppens data (navn osv.) ud fra URL'ens groupId
   useEffect(() => {
     if (!groupId) return;
 
@@ -36,23 +33,19 @@ function GroupPage() {
 
   return (
     <div>
-      {/* Topbar – viser gruppenavn i midten + søgefelt styres herfra */}
-      <Navbar
-        pageTitle={title}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+      
+      <Navbar pageTitle={title} />
 
-      {/* Samme 3-kolonne layout som på forsiden */}
+      
       <div className="layout-grid">
         <Sidebar />
 
         <div className="feed">
-          {/* Ekstra overskrift inde i selve feedet (valgfri) */}
-          <h2>{title}</h2>
+        
+          <CreatePost fixedGroupId={groupId} hideGroupSelector />
 
-          {/* Viser kun opslag fra denne gruppe + filtrerer på søgning */}
-          <PostList groupId={groupId} searchQuery={searchQuery} />
+        
+          <PostList groupId={groupId} />
         </div>
 
         <RightPanel />
