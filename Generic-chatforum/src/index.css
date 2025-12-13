@@ -1,39 +1,33 @@
 /* src/index.css */
 
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: #222;
-  background-color: #f3f3f3;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Links */
 a {
   font-weight: 500;
   color: inherit;
   text-decoration: none;
 }
 
-/* Grundlayout */
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #f3f3f3;
+  background: #eef1f5;
 }
 
-/* Root-container (Vite mount point) */
 #root {
   width: 100%;
   min-height: 100vh;
 }
 
-/* Basis */
 h1 {
   font-size: 2rem;
   line-height: 1.2;
@@ -44,219 +38,8 @@ button {
   font-family: inherit;
 }
 
-/* ===== Log ud-knap (rød) ===== */
-.btn-logout {
-  background: #e84545;
-  border-color: #c4302f;
-  color: #fff;
-}
-
-.btn-logout:hover {
-  background: #c4302f;
-}
-
-/* ===== CreatePost – submit-knap ===== */
-.create-post-submit {
-  padding: 8px 18px;
-  border-radius: 999px;          /* pill-shape */
-  border: none;
-  background: #2563eb;           /* blå */
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
-  transition: background 0.15s ease, transform 0.1s ease,
-              box-shadow 0.15s ease;
-}
-
-.create-post-submit:hover {
-  background: #1d4ed8;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
-}
-
-.create-post-submit:disabled {
-  opacity: 0.6;
-  cursor: default;
-  transform: none;
-  box-shadow: none;
-}
-
-
-/* === VISUEL OPGRADERING AF FORSIDEN ===================== */
-
-/* Lidt lysere baggrund og mere “luft” */
-body {
-  background: #eef1f5;
-}
-
-/* Lidt mere luft mellem kolonnerne og centreret grid */
-.layout-grid {
-  max-width: 1200px;
-  margin: 24px auto 40px;
-  gap: 24px;
-}
-
-/* Cards (sidebar, nyheder, reklame) får samme look */
-.sidebar,
-.news-box,
-.ad-box {
-  border-radius: 18px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
-  background: #ffffff;
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
-}
-
-/* Let hover-effekt på bokse */
-.sidebar:hover,
-.news-box:hover,
-.ad-box:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
-}
-
-/* Create-post kortet lidt større og mere “sektion”-agtigt */
-.create-post {
-  padding: 20px 26px 18px;
-  border-radius: 22px;
-}
-
-/* Overskrift i create-post */
-.create-post h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #111827;
-}
-
-/* Inputs i create-post (titel, tekst, select) */
-.create-post input,
-.create-post textarea,
-.create-post select {
-  width: 100%;
-  font-family: inherit;
-  font-size: 14px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
-  box-sizing: border-box;
-}
-
-.create-post input:focus,
-.create-post textarea:focus,
-.create-post select:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-
-/* Posts gør vi lidt mere “kort-agtige” med hover */
-.post {
-  border-radius: 22px;
-  padding: 18px 22px 14px;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
-}
-
-.post:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
-}
-
-/* Forfatter + dato lidt tydeligere */
-.post-author {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.post-date {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-/* Tekst i opslag lidt mere læsevenlig */
-.post-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #374151;
-}
-
-/* Kommentar-bokse får lidt mindre kontrast */
-.comment-box {
-  background: #f3f4f6;
-  border-radius: 10px;
-}
-
-/* Like- og kommentarfelt lidt strammere */
-.post-actions-row {
-  margin-top: 4px;
-}
-
-/* Lidt mere margin mellem opslagene */
-.post-list {
-  gap: 16px;
-}
-
-/* === Pænere "Grupper"-felt ===================== */
-
-/* Titel "Grupper" */
-.sidebar h3 {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #6b7280;
-  margin: 0 0 10px;
-}
-
-/* Selve listen */
-.sidebar ul {
-  margin: 0;
-  padding: 0;
-}
-
-/* Afstand + tynde linjer mellem grupper */
-.sidebar li + li {
-  margin-top: 4px;
-  border-top: 1px solid #edf2f7;
-}
-
-/* Links til grupper */
-.sidebar a {
-  display: flex;
-  align-items: center;
-  padding: 8px 4px;
-  border-radius: 8px;
-  font-size: 15px;
-  color: #111827;
-  font-weight: 500;
-}
-
-/* Lille farvet prik foran teksten */
-.sidebar a::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #d1d5db;
-  margin-right: 10px;
-}
-
-/* Hover */
-.sidebar a:hover {
-  background: #f3f4ff;
-  color: #1d4ed8;
-}
-
-/* Aktiv gruppe – hvis du på sigt giver linket className="active" */
-.sidebar a.active {
-  background: #e0ebff;
-  color: #1d4ed8;
-}
-
-.sidebar a.active::before {
-  background: #2563eb;
+/* Global wrapper (hvis du bruger .app-root på din app-container) */
+.app-root {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #e5f0ff 0, #f3f4f6 55%, #f3f4f6 100%);
 }

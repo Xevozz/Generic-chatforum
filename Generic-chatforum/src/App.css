@@ -1,12 +1,52 @@
-/* ===== Global wrapper ===== */
+/* src/App.css */
 
-.app-root {
-  min-height: 100vh;
-  background: radial-gradient(circle at top, #e5f0ff 0, #f3f4f6 55%, #f3f4f6 100%);
+/* =========================
+   Buttons
+========================= */
+.btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
-/* ===== NAVBAR ===== */
+.btn-outline {
+  background: #ffffff;
+  border-color: #d1d5db;
+  color: #111827;
+}
 
+.btn-outline:hover {
+  background: #f3f4f6;
+}
+
+.btn-primary {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+}
+
+.btn-logout {
+  background: #e84545;
+  border-color: #c4302f;
+  color: #fff;
+}
+
+.btn-logout:hover {
+  background: #c4302f;
+}
+
+/* =========================
+   Navbar
+========================= */
 .navbar {
   position: sticky;
   top: 0;
@@ -21,7 +61,6 @@
   gap: 16px;
 }
 
-/* Venstre side */
 .navbar-left {
   min-width: 140px;
 }
@@ -32,13 +71,12 @@
   color: #111827;
 }
 
-/* Midten */
 .navbar-center {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .navbar-search {
@@ -59,9 +97,9 @@
 
 .navbar-page-title {
   width: 60%;
-  max-width: 420px;
+  max-width: 520px;
   text-align: center;
-  padding: 4px 0;
+  padding: 6px 0;
   border-radius: 8px;
   border-bottom: 2px solid #2563eb;
   font-size: 13px;
@@ -70,7 +108,21 @@
   color: #4b5563;
 }
 
-/* Højre side */
+/* OPTIONAL: hvis du vil have større/pænere titel
+   (tilføj className="navbar-page-title navbar-page-title--big") */
+.navbar-page-title--big {
+  width: auto;
+  max-width: none;
+  border-bottom: none;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 18px;
+  font-weight: 800;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+}
+
 .navbar-right {
   display: flex;
   align-items: center;
@@ -82,84 +134,72 @@
   color: #4b5563;
 }
 
-/* Buttons */
-
-.btn {
-  padding: 6px 14px;
-  font-size: 13px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-}
-
-/* "Lav opslag" */
-.btn-outline {
-  background: #ffffff;
-  border-color: #d1d5db;
-  color: #111827;
-}
-
-.btn-outline:hover {
-  background: #f3f4f6;
-}
-
-/* "Log ind/ud" */
-.btn-primary {
-  background: #2563eb;
-  border-color: #1d4ed8;
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: #1d4ed8;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
-}
-
-/* Responsiv navbar */
 @media (max-width: 900px) {
   .navbar {
     flex-wrap: wrap;
     justify-content: center;
   }
-
   .navbar-center {
     order: 3;
     width: 100%;
   }
-
   .navbar-search,
   .navbar-page-title {
     width: 90%;
+    max-width: none;
   }
 }
 
-/* ===== LAYOUT ===== */
-
+/* =========================
+   Layout grid
+========================= */
 .layout-grid {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 260px;
-  gap: 20px;
-  padding: 20px;
-  max-width: 1150px;
-  margin: 16px auto 40px;
+  grid-template-columns: 260px minmax(0, 1fr) 300px;
+  gap: 24px;
+  padding: 18px 28px;
+  max-width: 1400px;
+  margin: 12px auto 40px;
 }
 
-/* === SIDEBAR === */
+@media (max-width: 900px) {
+  .layout-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 
-.sidebar {
-  background: #fff;
-  padding: 16px 14px;
-  border-radius: 16px;
-  height: fit-content;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+/* =========================
+   Sidebar / Right panel cards
+========================= */
+.sidebar,
+.news-box,
+.ad-box {
+  background: #ffffff;
+  border-radius: 18px;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.sidebar:hover,
+.news-box:hover,
+.ad-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
+}
+
+/* Sidebar */
+.sidebar {
+  padding: 16px 14px;
+  height: fit-content;
 }
 
 .sidebar h3 {
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
 }
 
 .sidebar ul {
@@ -168,38 +208,46 @@
   margin: 0;
 }
 
-.sidebar li {
-  padding: 4px 0;
+.sidebar li + li {
+  margin-top: 4px;
+  border-top: 1px solid #edf2f7;
 }
 
 .sidebar a {
-  display: block;
-  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  padding: 8px 6px;
   border-radius: 10px;
-  font-size: 14px;
-  text-decoration: none;
-  color: #374151;
+  font-size: 15px;
+  color: #111827;
+  font-weight: 500;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
+.sidebar a::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #d1d5db;
+  margin-right: 10px;
+}
+
 .sidebar a:hover {
-  background: #eff6ff;
+  background: #f3f4ff;
   color: #1d4ed8;
 }
 
-/* === MAIN FEED === */
-
-.feed {
-  background: transparent;
-  padding: 0;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.sidebar a.active {
+  background: #e0ebff;
+  color: #1d4ed8;
 }
 
-/* === RIGHT PANEL === */
+.sidebar a.active::before {
+  background: #2563eb;
+}
 
+/* Right panel */
 .right-panel {
   display: flex;
   flex-direction: column;
@@ -208,71 +256,119 @@
 
 .news-box,
 .ad-box {
-  background: #fff;
   padding: 16px 14px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid #e5e7eb;
 }
 
 @media (max-width: 900px) {
-  .layout-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .right-panel {
     display: none;
   }
 }
 
-/* ===== CreatePost (feltet på forsiden) ===== */
-
-.create-post {
-  background: #fff;
-  padding: 12px 16px;
-  border-radius: 16px;
-  margin-bottom: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-  border: 1px solid #e5e7eb;
-}
-
-.create-post textarea {
-  resize: vertical;
-  min-height: 140px;
-  padding: 8px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-family: inherit;
-  background: #f9fafb;
-}
-
-.create-post textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-
-.create-post button {
-  align-self: flex-end;
-}
-
-/* ===== POSTS ===== */
-
-.post-list {
+/* =========================
+   Feed
+========================= */
+.feed {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
+/* =========================
+   CreatePost
+========================= */
+.create-post {
+  background: #fff;
+  padding: 20px 26px 18px;
+  border-radius: 22px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-post h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.create-post input,
+.create-post textarea,
+.create-post select {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+
+.create-post textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.create-post input:focus,
+.create-post textarea:focus,
+.create-post select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.create-post-submit {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  align-self: flex-end;
+}
+
+.create-post-submit:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+}
+
+.create-post-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+/* =========================
+   Posts
+========================= */
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .post {
   background: #fff;
-  padding: 16px 18px 12px;
-  border-radius: 18px;
-  margin: 4px 0 12px;
-  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+  padding: 18px 22px 14px;
+  border-radius: 22px;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.post:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
 }
 
 .post-header {
@@ -295,23 +391,14 @@
 }
 
 .post-author {
-  font-weight: 600;
   font-size: 14px;
+  font-weight: 600;
+  color: #111827;
 }
 
 .post-date {
   font-size: 12px;
-  color: #777;
-}
-
-.post-text {
-  padding: 6px 0 10px;
-  font-size: 14px;
-}
-
-.post-text {
-  padding: 6px 0 10px;
-  font-size: 14px;
+  color: #9ca3af;
 }
 
 .post-title {
@@ -326,16 +413,23 @@
   font-size: 14px;
   color: #374151;
   line-height: 1.5;
-  white-space: pre-line; /* bevarer linjeskift i beskrivelsen */
+  white-space: pre-line;
 }
 
-/* Like + kommentarrække */
+/* fallback hvis .post-text stadig bruges */
+.post-text {
+  padding: 6px 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #374151;
+}
 
+/* Like + kommentar */
 .post-actions-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin: 4px 0 10px;
 }
 
 .like-btn {
@@ -381,7 +475,6 @@
 }
 
 /* Kommentarer */
-
 .comments-section {
   margin-top: 8px;
   border-top: 1px solid #e5e7eb;
@@ -389,9 +482,9 @@
 }
 
 .comment-box {
-  background: #f7f7f7;
+  background: #f3f4f6;
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 6px;
 }
 
@@ -409,9 +502,9 @@
   font-size: 13px;
 }
 
-/* ===== MODAL (CreatePostModal) ===== */
-
-/* Overlay */
+/* =========================
+   Modal
+========================= */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -426,7 +519,6 @@
   z-index: 999;
 }
 
-/* Vindue */
 .modal {
   background: #fff;
   width: 70%;
@@ -446,19 +538,11 @@
   font-size: 18px;
 }
 
-/* Fade/Pop-in animation */
 @keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Inputs */
 .modal input,
 .modal textarea,
 .modal select {
@@ -476,7 +560,6 @@
   resize: vertical;
 }
 
-/* Buttons row */
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
@@ -491,13 +574,11 @@
   cursor: pointer;
 }
 
-/* Close-btn (Luk) */
 .modal-buttons button:first-child {
   background: #eee;
   border: 1px solid #bbb;
 }
 
-/* Create-btn (Opret) */
 .modal-buttons button:last-child {
   background: #2c87f0;
   border: 1px solid #1e6bd6;
@@ -509,7 +590,6 @@
   background: #1e6bd6;
 }
 
-/* Fejlbesked i modal */
 .modal-error {
   color: #d93025;
   background: #fde8e7;
@@ -523,20 +603,14 @@
   animation: fadeIn 0.2s ease-in-out;
 }
 
-/* Lidt fade-in animation */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== AUTH PAGES (login + opret bruger) ===== */
-
+/* =========================
+   Auth pages
+========================= */
 .auth-page {
   min-height: 100vh;
   display: flex;
