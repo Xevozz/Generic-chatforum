@@ -1,6 +1,6 @@
 // src/services/postsService.js
 // Håndtering af opslag: opret, likes, kommentarer + gruppe-understøttelse
-
+import { createNotification } from "./notificationsService";
 import {
   collection,
   addDoc,
@@ -110,7 +110,7 @@ export async function deletePost(postId) {
 // ======================================================
 // Tilføj kommentar
 // ======================================================
-export async function addCommentToPost(postId, text, authorId = null) {
+export async function addCommentToPost(postId, text, authorId = null, authorName = "") {
   const commentsRef = collection(db, "posts", postId, "comments");
 
   await addDoc(commentsRef, {
@@ -118,6 +118,26 @@ export async function addCommentToPost(postId, text, authorId = null) {
     authorId,
     createdAt: serverTimestamp(),
   });
+  try {
+  const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+  if (!postSnap.exists()) return;
+
+  const post = postSnap.data();
+  const ownerId = post.authorId;
+
+  if (!ownerId || !authorId || ownerId === authorId) return;
+
+  await createNotification({
+    toUserId: ownerId,
+    fromUserName: authorName || "Ukendt bruger",
+    type: "comment",
+    postId,
+    groupId: post.groupId || null,
+  });
+} catch (e) {
+  console.error("Fejl ved comment-notifikation:", e);
+}
 }
 
 
@@ -150,4 +170,26 @@ export async function toggleLike(postId, { userId, displayName, hasLiked }) {
   await updateDoc(postRef, {
     likedBy: hasLiked ? arrayRemove(likeObj) : arrayUnion(likeObj),
   });
+
+  if (!hasLiked) {
+    try {
+      const postSnap = await getDoc(postRef);
+      if (!postSnap.exists()) return;
+
+      const post = postSnap.data();
+      const ownerId = post.authorId;
+
+      if (!ownerId || !userId || ownerId === userId) return;
+
+      await createNotification({
+        toUserId: ownerId,
+        fromUserName: displayName || "Ukendt bruger",
+        type: "like",
+        postId,
+        groupId: post.groupId || null,
+      });
+    } catch (e) {
+      console.error("Fejl ved like-notifikation:", e);
+    }
+  }
 }
