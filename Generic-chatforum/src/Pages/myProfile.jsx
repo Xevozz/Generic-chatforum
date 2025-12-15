@@ -1,43 +1,114 @@
+// src/pages/myProfile.jsx
+import Navbar from "../components/Navbar";
+import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import PostList from "../components/Posts/PostList";
-import Navbar from "../components/Navbar";
 
-function MyProfile() {
+export default function MyProfile() {
   const { user, profile, loading } = useAuth();
 
-  if (loading) return <p>Indlæser profil...</p>;
-  if (!user || !profile) return <p>Du skal være logget ind.</p>;
+  if (loading) return <p style={{ padding: 16 }}>Indlæser profil…</p>;
+  if (!user || !profile) return <p style={{ padding: 16 }}>Du skal være logget ind.</p>;
+
+  const email = profile.email || user.email;
+  const initials =
+    (profile.displayName || email || "U")
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((s) => s[0].toUpperCase())
+      .join("");
 
   return (
-    <div className="my-profile-page" style={{ maxWidth: 900, margin: "0 auto" }}>
-      <h1>Min profil</h1>
+    <div>
+      <Navbar pageTitle="Min profil" />
 
-      {/* PROFIL INFO */}
-      <section className="profile-card">
-        <h2>Brugeroplysninger</h2>
-        <p><strong>Navn:</strong> {profile.displayName}</p>
-        <p><strong>Email:</strong> {profile.email || user.email}</p>
+      <Layout>
+        <div className="profile-page">
+          {/* Header card */}
+          <section className="profile-hero">
+            <div className="profile-hero-left">
+              <div className="profile-avatar">{initials}</div>
+              <div className="profile-hero-text">
+                <h1 className="profile-name">{profile.displayName}</h1>
+                <p className="profile-sub">{email}</p>
+              </div>
+            </div>
 
-        {profile.about && (
-          <p><strong>Om mig:</strong> {profile.about}</p>
-        )}
-      </section>
+            <div className="profile-hero-right">
+              <div className="profile-pill">
+                <span className="profile-pill-label">Status</span>
+                <span className="profile-pill-value">Aktiv</span>
+              </div>
+              {profile.isAdmin && (
+                <div className="profile-pill">
+                  <span className="profile-pill-label">Rolle</span>
+                  <span className="profile-pill-value">Admin</span>
+                </div>
+              )}
+            </div>
+          </section>
 
-      {/* KONTAKT */}
-      <section className="profile-card">
-        <h2>Kontakt</h2>
-        <p><strong>Email:</strong> {profile.email || user.email}</p>
-        {profile.phone && <p><strong>Telefon:</strong> {profile.phone}</p>}
-        {profile.city && <p><strong>By:</strong> {profile.city}</p>}
-      </section>
+          {/* Info cards */}
+          <div className="profile-grid">
+            <section className="profile-card">
+              <h2>Brugeroplysninger</h2>
 
-      {/* MINE OPSLAG */}
-      <section>
-        <h2>Mine opslag</h2>
-        <PostList authorId={user.uid} />
-      </section>
+              <div className="profile-row">
+                <span className="profile-label">Navn</span>
+                <span className="profile-value">{profile.displayName}</span>
+              </div>
+
+              <div className="profile-row">
+                <span className="profile-label">Email</span>
+                <span className="profile-value">{email}</span>
+              </div>
+
+              <div className="profile-row profile-row--stack">
+                <span className="profile-label">Om mig</span>
+                <span className="profile-value">
+                  {profile.about?.trim() ? profile.about : "—"}
+                </span>
+              </div>
+            </section>
+
+            <section className="profile-card">
+              <h2>Kontakt</h2>
+
+              <div className="profile-row">
+                <span className="profile-label">Email</span>
+                <span className="profile-value">{email}</span>
+              </div>
+
+              <div className="profile-row">
+                <span className="profile-label">Telefon</span>
+                <span className="profile-value">{profile.phone || "—"}</span>
+              </div>
+
+              <div className="profile-row">
+                <span className="profile-label">By</span>
+                <span className="profile-value">{profile.city || "—"}</span>
+              </div>
+
+              <div className="profile-row">
+                <span className="profile-label">Website</span>
+                <span className="profile-value">{profile.website || "—"}</span>
+              </div>
+            </section>
+          </div>
+
+          {/* Posts section */}
+          <section className="profile-card">
+            <div className="profile-card-head">
+              <h2>Mine opslag</h2>
+              <span className="profile-muted">Seneste aktivitet</span>
+            </div>
+
+            {/* Midlertidigt: bruger din eksisterende PostList */}
+            <PostList />
+          </section>
+        </div>
+      </Layout>
     </div>
   );
 }
-
-export default MyProfile;

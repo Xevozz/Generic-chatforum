@@ -98,7 +98,14 @@ function Navbar({
       <header className="navbar">
         {/* LEFT */}
         <div className="navbar-left">
-          <span className="navbar-app-title">Chat Forum</span>
+          <button
+            type="button"
+            className="navbar-app-title-btn"
+            onClick={() => navigate("/home")}
+            title="Gå til forsiden"
+          >
+            Chat Forum
+          </button>
         </div>
 
         {/* CENTER */}
@@ -110,15 +117,23 @@ function Navbar({
 
         {/* RIGHT */}
         <div className="navbar-right">
-        {displayName && (
-          <button
-            className="navbar-username-btn"
-            onClick={() => navigate("/my-profile")}
-            title="Gå til min profil"
-          >
-            {displayName}
-          </button>
-        )}
+        {user && (
+            <>
+              <button
+                className="navbar-profile-btn"
+                onClick={() => navigate("/my-profile")}
+                title="Gå til min profil"
+              >
+                Min profil
+              </button>
+
+              {displayName && (
+                <span className="navbar-username-muted">
+                  {displayName}
+                </span>
+              )}
+            </>
+          )}
 
           {/* 🔔 Notifications */}
           {user && (
