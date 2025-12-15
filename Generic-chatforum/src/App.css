@@ -150,6 +150,19 @@
   }
 }
 
+.navbar-username-btn {
+  background: none;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  padding: 0 8px;
+}
+
+.navbar-username-btn:hover {
+  text-decoration: underline;
+}
+
 /* =========================
    Layout grid
 ========================= */

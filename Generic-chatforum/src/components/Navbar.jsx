@@ -110,9 +110,15 @@ function Navbar({
 
         {/* RIGHT */}
         <div className="navbar-right">
-          {displayName && (
-            <span className="navbar-username">{displayName}</span>
-          )}
+        {displayName && (
+          <button
+            className="navbar-username-btn"
+            onClick={() => navigate("/my-profile")}
+            title="Gå til min profil"
+          >
+            {displayName}
+          </button>
+        )}
 
           {/* 🔔 Notifications */}
           {user && (

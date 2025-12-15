@@ -3,7 +3,19 @@ import LoginPage from "./pages/loginPage";
 import CreateUserPage from "./pages/createUser";
 import HomePage from "./pages/homePage";
 import GroupPage from "./pages/groupPage";
+import { useAuth } from "./context/AuthContext";
+import MyProfile from "./pages/myProfile";
 import "./App.css";
+
+// Beskytter routes der kræver login
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return <p>Indlæser...</p>;
+  if (!user) return <Navigate to="/login" replace />;
+
+  return children;
+}
 
 function App() {
   return (
@@ -15,16 +27,37 @@ function App() {
         {/* Opret bruger */}
         <Route path="/create-user" element={<CreateUserPage />} />
 
-        {/* Forside */}
-        <Route path="/home" element={<HomePage />} />
+        {/* Beskyttede routes */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Standard route → redirect til login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route
+          path="/my-profile"
+          element={
+            <ProtectedRoute>
+              <MyProfile />
+            </ProtectedRoute>
+          }
+        />
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route
+          path="/groups/:groupId"
+          element={
+            <ProtectedRoute>
+              <GroupPage />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/group/:groupId" element={<GroupPage />} />
+        {/* Redirects */}
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </BrowserRouter>
   );
