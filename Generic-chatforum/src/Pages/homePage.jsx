@@ -2,21 +2,24 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Layout from "../components/Layout";
+import CreatePost from "../components/Posts/CreatePost";
+import PostList from "../components/Posts/PostList";
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div>
-      {/* Top navigation */}
       <Navbar
         pageTitle="Alle opslag"
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
 
-      {/* Selve forum-layoutet: sidebar + feed + højre panel */}
-      <Layout searchQuery={searchQuery} />
+      <Layout>
+        <CreatePost />
+        <PostList searchQuery={searchQuery} />
+      </Layout>
     </div>
   );
 }

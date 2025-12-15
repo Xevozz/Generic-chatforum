@@ -1,5 +1,6 @@
 import { useAuth } from "../context/AuthContext";
 import PostList from "../components/Posts/PostList";
+import Navbar from "../components/Navbar";
 
 function MyProfile() {
   const { user, profile, loading } = useAuth();

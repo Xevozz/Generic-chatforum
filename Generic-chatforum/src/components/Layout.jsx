@@ -1,19 +1,12 @@
 // src/components/Layout.jsx
 import Sidebar from "./Sidebar";
-import PostList from "./Posts/PostList";
 import RightPanel from "./RightPanel";
-import CreatePost from "./Posts/CreatePost";
 
-function Layout({ searchQuery = "" }) {
+function Layout({ children }) {
   return (
     <div className="layout-grid">
       <Sidebar />
-
-      <div className="feed">
-        <CreatePost />
-        <PostList searchQuery={searchQuery} />
-      </div>
-
+      <div className="feed">{children}</div>
       <RightPanel />
     </div>
   );
