@@ -1,5 +1,4 @@
 // src/components/Posts/CreatePost.jsx
-
 import { useState, useEffect } from "react";
 import { createPost } from "../../services/postsService";
 import { listenToGroups } from "../../services/groupService";
@@ -15,7 +14,7 @@ function CreatePost() {
 
   const { user, profile } = useAuth();
 
-  // Hent grupper til dropdown
+  // Hent grupper
   useEffect(() => {
     const unsub = listenToGroups((loadedGroups) => {
       setGroups(loadedGroups);
@@ -27,37 +26,36 @@ function CreatePost() {
     e.preventDefault();
     setError(null);
 
-    if (!title.trim()) {
-      return setError("Du skal skrive en overskrift.");
+    if (!user?.uid) {
+      return setError("Du skal være logget ind for at oprette et opslag.");
     }
-    if (title.trim().length < 3) {
+
+    const cleanTitle = title.trim();
+    const cleanContent = content.trim();
+    const cleanGroupId = selectedGroup || null;
+
+    if (cleanTitle.length < 3) {
       return setError("Overskriften skal være mindst 3 tegn.");
     }
-    if (!content.trim()) {
-      return setError("Du skal skrive en beskrivelse.");
-    }
-    if (content.trim().length < 10) {
+    if (cleanContent.length < 10) {
       return setError("Beskrivelsen skal være mindst 10 tegn.");
     }
-    if (!selectedGroup) {
+    if (!cleanGroupId) {
       return setError("Du skal vælge en gruppe.");
-    }
-    if (!user) {
-      return setError("Du skal være logget ind for at oprette et opslag.");
     }
 
     setSaving(true);
 
     try {
       await createPost({
-        title: title.trim(),
-        content: content.trim(),
-        groupId: selectedGroup,
-        authorId: user.uid,
-        authorName: profile?.displayName || user.email,
+        title: cleanTitle,
+        content: cleanContent,
+        groupId: cleanGroupId,
+        authorId: user.uid, // ⭐ VIGTIGST
+        authorName: profile?.displayName || user.email || "Ukendt bruger",
       });
 
-      // Nulstil felter
+      // Reset felter
       setTitle("");
       setContent("");
       setSelectedGroup("");
@@ -73,28 +71,23 @@ function CreatePost() {
     <form onSubmit={handleSubmit} className="create-post">
       <h3>Lav nyt opslag</h3>
 
-      {/* Titel */}
       <input
         type="text"
         placeholder="Overskrift"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        style={{ marginBottom: "6px" }}
       />
 
-      {/* Beskrivelse */}
       <textarea
         placeholder="Hvad vil du dele?"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        rows={3}
+        rows={4}
       />
 
-      {/* Vælg gruppe */}
       <select
         value={selectedGroup}
         onChange={(e) => setSelectedGroup(e.target.value)}
-        style={{ marginTop: "6px" }}
       >
         <option value="">Vælg gruppe...</option>
         {groups.map((g) => (
@@ -104,19 +97,11 @@ function CreatePost() {
         ))}
       </select>
 
-      {error && (
-        <p style={{ color: "red", marginTop: "6px", fontSize: "14px" }}>
-          {error}
-        </p>
-      )}
+      {error && <p className="error-text">{error}</p>}
 
-            <button
-          type="submit"
-          disabled={saving}
-          className="create-post-submit"
-        >
-  {saving ? "Opretter..." : "Opret opslag"}
-</button>
+      <button type="submit" disabled={saving} className="create-post-submit">
+        {saving ? "Opretter..." : "Opret opslag"}
+      </button>
     </form>
   );
 }

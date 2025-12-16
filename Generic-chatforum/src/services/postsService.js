@@ -1,6 +1,7 @@
 // src/services/postsService.js
-// Håndtering af opslag: opret, likes, kommentarer + gruppe-understøttelse
 import { createNotification } from "./notificationsService";
+import { db } from "../firebaseConfig";
+
 import {
   collection,
   addDoc,
@@ -9,77 +10,59 @@ import {
   orderBy,
   onSnapshot,
   doc,
+  getDoc,
   updateDoc,
   deleteDoc,
   arrayUnion,
   arrayRemove,
   where,
 } from "firebase/firestore";
-import { db } from "../firebaseConfig";
 
 const postsRef = collection(db, "posts");
 
-
 // ======================================================
-// Opret et nyt opslag (MODAL + HomePage + Gruppe)
+// Opret et nyt opslag
 // ======================================================
-export async function createPost({ 
+export async function createPost({
   title = "",
-  content, 
-  authorId = null, 
-  authorName, 
-  groupId = null 
+  content,
+  authorId = null,
+  authorName,
+  groupId = null,
 }) {
+  if (!content?.trim()) throw new Error("Opslaget må ikke være tomt.");
 
-  if (!content.trim()) throw new Error("Opslaget må ikke være tomt.");
-
-  // Gør kompatibel med gamle komponenter (som læser Content-feltet)
-  const combinedText = title
-    ? `${title}\n\n${content}` 
-    : content;
+  const combinedText = title ? `${title}\n\n${content}` : content;
 
   await addDoc(postsRef, {
-    // Beholder dette for COMPATIBILITY med ældre UI:
-    Content: combinedText.trim(),
-
-    // Nyere UI læser også dette:
+    Content: combinedText.trim(), // legacy
     title: title || null,
     content: content.trim(),
 
     authorId: authorId || null,
     authorName: authorName || "Ukendt bruger",
 
-    groupId: groupId || null,   // ⭐ vigtig for gruppe-funktionen
+    groupId: groupId || null,
     createdAt: serverTimestamp(),
-
-    likedBy: [], // beholdt for like-systemet
+    likedBy: [],
   });
 }
 
-
-
 // ======================================================
-// Lyt til ALLE opslag (forsiden)
+// Lyt til ALLE opslag
 // ======================================================
 export function listenToAllPosts(callback) {
   const q = query(postsRef, orderBy("createdAt", "desc"));
-
   return onSnapshot(q, (snapshot) => {
-    const posts = snapshot.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
+    const posts = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     callback(posts);
   });
 }
 
-
-
 // ======================================================
-// Lyt kun til opslag i en specifik gruppe
+// Lyt til opslag i en specifik gruppe
 // ======================================================
 export function listenToPostsByGroup(groupId, callback) {
-
   const q = query(
     postsRef,
     where("groupId", "==", groupId),
@@ -87,60 +70,58 @@ export function listenToPostsByGroup(groupId, callback) {
   );
 
   return onSnapshot(q, (snapshot) => {
-    const posts = snapshot.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
+    const posts = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     callback(posts);
   });
 }
 
-
-
 // ======================================================
-// Slet et opslag (kun hvis I har UI for det)
+// Slet opslag
 // ======================================================
 export async function deletePost(postId) {
-  const postRef = doc(db, "posts", postId);
-  await deleteDoc(postRef);
+  await deleteDoc(doc(db, "posts", postId));
 }
 
-
-
 // ======================================================
-// Tilføj kommentar
+// Tilføj kommentar + notifikation
 // ======================================================
-export async function addCommentToPost(postId, text, authorId = null, authorName = "") {
+export async function addCommentToPost(
+  postId,
+  text,
+  authorId = null,
+  authorName = ""
+) {
   const commentsRef = collection(db, "posts", postId, "comments");
 
   await addDoc(commentsRef, {
     text,
     authorId,
+    authorName: authorName || "Ukendt bruger",
     createdAt: serverTimestamp(),
   });
+
+  // Notifikation til ejeren
   try {
-  const postRef = doc(db, "posts", postId);
-  const postSnap = await getDoc(postRef);
-  if (!postSnap.exists()) return;
+    const postRef = doc(db, "posts", postId);
+    const postSnap = await getDoc(postRef);
+    if (!postSnap.exists()) return;
 
-  const post = postSnap.data();
-  const ownerId = post.authorId;
+    const post = postSnap.data();
+    const ownerId = post.authorId;
 
-  if (!ownerId || !authorId || ownerId === authorId) return;
+    if (!ownerId || !authorId || ownerId === authorId) return;
 
-  await createNotification({
-    toUserId: ownerId,
-    fromUserName: authorName || "Ukendt bruger",
-    type: "comment",
-    postId,
-    groupId: post.groupId || null,
-  });
-} catch (e) {
-  console.error("Fejl ved comment-notifikation:", e);
+    await createNotification({
+      toUserId: ownerId,
+      fromUserName: authorName || "Ukendt bruger",
+      type: "comment",
+      postId,
+      groupId: post.groupId || null,
+    });
+  } catch (e) {
+    console.error("Fejl ved comment-notifikation:", e);
+  }
 }
-}
-
-
 
 // ======================================================
 // Lyt til kommentarer
@@ -158,10 +139,8 @@ export function listenToComments(postId, callback) {
   });
 }
 
-
-
 // ======================================================
-// LIKE / UNLIKE — understøtter arrayUnion + arrayRemove
+// Like / Unlike + notifikation
 // ======================================================
 export async function toggleLike(postId, { userId, displayName, hasLiked }) {
   const postRef = doc(db, "posts", postId);
@@ -171,6 +150,7 @@ export async function toggleLike(postId, { userId, displayName, hasLiked }) {
     likedBy: hasLiked ? arrayRemove(likeObj) : arrayUnion(likeObj),
   });
 
+  // Notifikation kun når man liker (ikke når man fjerner)
   if (!hasLiked) {
     try {
       const postSnap = await getDoc(postRef);

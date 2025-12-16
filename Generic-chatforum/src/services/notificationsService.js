@@ -15,13 +15,20 @@ import {
   limit,
 } from "firebase/firestore";
 
-export async function createNotification({ toUserId, fromUserName, type, postId, groupId }) {
-  if (!toUserId) return;
+export async function createNotification({
+  toUserId,
+  fromUserName,
+  type,      // "comment" | "like"
+  postId,
+  groupId,
+}) {
+  const cleanToUserId = (toUserId || "").trim();
+  if (!cleanToUserId) return;
 
   await addDoc(collection(db, "notifications"), {
-    toUserId,
-    fromUserName: fromUserName || "Ukendt bruger",
-    type: type || "unknown",
+    toUserId: cleanToUserId,
+    fromUserName: (fromUserName || "Ukendt bruger").trim(),
+    type: (type || "unknown").trim(),
     postId: postId || null,
     groupId: groupId || null,
     isRead: false,

@@ -107,7 +107,7 @@ function Post({ post }) {
 
     setSending(true);
     try {
-      await addCommentToPost(post.id, commentText.trim(), currentUserId || null);
+      await addCommentToPost(post.id, commentText.trim(), currentUserId, currentUserName);
       setCommentText("");
     } catch (err) {
       console.error("Fejl ved oprettelse af kommentar:", err);

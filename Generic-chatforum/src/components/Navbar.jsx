@@ -58,7 +58,8 @@ function Navbar({
     };
   }, [notifOpen]);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadNotifications = notifications.filter((n) => !n.isRead);
+  const unreadCount = unreadNotifications.length;
 
   function notificationText(n) {
     const name = n.fromUserName || "Ukendt bruger";
@@ -67,22 +68,32 @@ function Navbar({
     return `${name} interagerede med dit opslag`;
   }
 
-  async function handleClickNotification(n) {
-    if (!n.isRead) {
-      await markNotificationRead(n.id);
-    }
+{unreadNotifications.length === 0 ? (
+  <div className="notif-empty">Ingen notifikationer endnu.</div>
+) : (
+  <div className="notif-list">
+    {unreadNotifications.map((n) => (
+      <button
+        key={n.id}
+        type="button"
+        className="notif-item is-unread"
+        onClick={() => handleClickNotification(n)}
+      >
+        <div className="notif-item-text">{notificationText(n)}</div>
+      </button>
+    ))}
+  </div>
+)}
 
-    if (n.groupId) navigate(`/groups/${n.groupId}`);
-    else navigate("/");
+async function handleMarkAllRead() {
+  setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
 
-    setNotifOpen(false);
+  try {
+    if (user?.uid) await markAllNotificationsRead(user.uid);
+  } catch (e) {
+    console.error("Fejl ved markér alle som læst:", e);
   }
-
-  async function handleMarkAllRead() {
-    if (user?.uid) {
-      await markAllNotificationsRead(user.uid);
-    }
-  }
+}
 
   async function handleLoginLogout() {
     if (user) {
@@ -165,24 +176,18 @@ function Navbar({
                     )}
                   </div>
 
-                  {notifications.length === 0 ? (
-                    <div className="notif-empty">
-                      Ingen notifikationer endnu.
-                    </div>
+                                    {unreadNotifications.length === 0 ? (
+                    <div className="notif-empty">Ingen notifikationer endnu.</div>
                   ) : (
                     <div className="notif-list">
-                      {notifications.map((n) => (
+                      {unreadNotifications.map((n) => (
                         <button
                           key={n.id}
                           type="button"
-                          className={`notif-item ${
-                            n.isRead ? "is-read" : "is-unread"
-                          }`}
+                          className="notif-item is-unread"
                           onClick={() => handleClickNotification(n)}
                         >
-                          <div className="notif-item-text">
-                            {notificationText(n)}
-                          </div>
+                          <div className="notif-item-text">{notificationText(n)}</div>
                         </button>
                       ))}
                     </div>
