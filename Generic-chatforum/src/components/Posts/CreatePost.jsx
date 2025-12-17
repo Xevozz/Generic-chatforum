@@ -4,23 +4,33 @@ import { createPost } from "../../services/postsService";
 import { listenToGroups } from "../../services/groupService";
 import { useAuth } from "../../context/AuthContext";
 
-function CreatePost() {
+function CreatePost({
+  fixedGroupId = "",        // ✅ bruges på GroupPage
+  hideGroupSelector = false // ✅ bruges på GroupPage
+}) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [groups, setGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState(fixedGroupId || "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   const { user, profile } = useAuth();
 
-  // Hent grupper
+  // Hent grupper (stadig relevant hvis man er på /home og dropdown vises)
   useEffect(() => {
     const unsub = listenToGroups((loadedGroups) => {
       setGroups(loadedGroups);
     });
     return () => unsub();
   }, []);
+
+  // ✅ Auto-vælg gruppen, når man er inde i en gruppe-side
+  useEffect(() => {
+    if (fixedGroupId) {
+      setSelectedGroup(fixedGroupId);
+    }
+  }, [fixedGroupId]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -32,7 +42,9 @@ function CreatePost() {
 
     const cleanTitle = title.trim();
     const cleanContent = content.trim();
-    const cleanGroupId = selectedGroup || null;
+
+    // ✅ hvis fixedGroupId findes, brug den — ellers brug dropdown-valg
+    const cleanGroupId = (fixedGroupId || selectedGroup || "").trim() || null;
 
     if (cleanTitle.length < 3) {
       return setError("Overskriften skal være mindst 3 tegn.");
@@ -51,14 +63,16 @@ function CreatePost() {
         title: cleanTitle,
         content: cleanContent,
         groupId: cleanGroupId,
-        authorId: user.uid, // ⭐ VIGTIGST
+        authorId: user.uid,
         authorName: profile?.displayName || user.email || "Ukendt bruger",
       });
 
       // Reset felter
       setTitle("");
       setContent("");
-      setSelectedGroup("");
+
+      // ✅ hvis man er inde i en gruppe, behold gruppen valgt
+      if (!fixedGroupId) setSelectedGroup("");
     } catch (err) {
       console.error("Fejl ved oprettelse af post:", err);
       setError("Noget gik galt. Prøv igen.");
@@ -85,17 +99,20 @@ function CreatePost() {
         rows={4}
       />
 
-      <select
-        value={selectedGroup}
-        onChange={(e) => setSelectedGroup(e.target.value)}
-      >
-        <option value="">Vælg gruppe...</option>
-        {groups.map((g) => (
-          <option key={g.id} value={g.id}>
-            {g.name}
-          </option>
-        ))}
-      </select>
+      {/* ✅ Dropdown skjules på gruppe-siden */}
+      {!hideGroupSelector && (
+        <select
+          value={selectedGroup}
+          onChange={(e) => setSelectedGroup(e.target.value)}
+        >
+          <option value="">Vælg gruppe...</option>
+          {groups.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
+      )}
 
       {error && <p className="error-text">{error}</p>}
 
