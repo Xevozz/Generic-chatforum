@@ -183,7 +183,7 @@ function Post({ post }) {
           comments.map((c) => (
             <div key={c.id} className="comment-box">
               <div className="comment-author">
-                {c.authorId || "Bruger"}
+                {c.authorName || "Bruger"}
               </div>
               <div className="comment-text">{c.text}</div>
             </div>
