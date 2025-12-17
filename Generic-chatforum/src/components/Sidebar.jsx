@@ -22,7 +22,7 @@ function Sidebar() {
 
         {groups.map((g) => (
           <li key={g.id}>
-            <Link to={`/group/${g.id}`}>{g.name}</Link>
+            <Link to={`/groups/${g.id}`}>{g.name}</Link>
           </li>
         ))}
       </ul>
