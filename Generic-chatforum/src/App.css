@@ -712,17 +712,19 @@
 }
 
 .auth-footer {
-  margin-top: 16px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   font-size: 14px;
+  color: #6b7280;
 }
 
 .auth-link-btn {
-  color: #0077ff;
-  font-weight: 500;
-  text-decoration: none;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .auth-link-btn:hover {
@@ -976,3 +978,243 @@
 }
 
 /* ===== Ukendt styling ===== */
+
+/* =========================================
+   LOGIN v2 (scoped) – påvirker kun .auth-page--clean
+   Læg nederst i din CSS
+========================================= */
+
+.auth-page.auth-page--clean {
+  min-height: 100vh;
+  background: #ffffff; /* din body er grå – her bliver login hvid */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+/* topbar */
+.auth-page--clean .auth-topbar {
+  display: flex;
+  justify-content: center;
+  padding: 28px 16px 10px;
+}
+
+.auth-page--clean .auth-brand {
+  width: min(980px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-page--clean .auth-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.auth-page--clean .auth-brand-title {
+  font-weight: 800;
+  font-size: 16px;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.auth-page--clean .auth-brand-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* shell */
+.auth-page--clean .auth-shell {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px 48px;
+}
+
+/* card (overskriver kun på clean-siden) */
+.auth-page--clean .auth-card.auth-card--lift {
+  width: min(420px, 100%);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 22px 20px;
+  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+}
+
+/* header */
+.auth-page--clean .auth-card-header {
+  margin-bottom: 16px;
+}
+
+.auth-page--clean .auth-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* NB: du har allerede .auth-subtitle globalt – derfor scoper vi her */
+.auth-page--clean .auth-subtitle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: left;
+}
+
+/* form */
+.auth-page--clean .auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-page--clean .auth-field {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-page--clean .auth-label {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.auth-page--clean .auth-inputwrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-page--clean .auth-inputicon {
+  position: absolute;
+  left: 12px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.auth-page--clean .auth-inputwrap input {
+  width: 100%;
+  padding: 11px 12px 11px 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.auth-page--clean .auth-inputwrap input:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.auth-page--clean .auth-eye {
+  position: absolute;
+  right: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.auth-page--clean .auth-eye:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* error */
+.auth-page--clean .auth-errorbox {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+/* button */
+.auth-page--clean .auth-primary-btn.auth-primary-btn--big {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  transition: transform 80ms ease, filter 120ms ease;
+}
+
+.auth-page--clean .auth-primary-btn.auth-primary-btn--big:hover {
+  filter: brightness(1.02);
+}
+
+.auth-page--clean .auth-primary-btn.auth-primary-btn--big:active {
+  transform: translateY(1px);
+}
+
+.auth-page--clean .auth-primary-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* spinner */
+.auth-page--clean .auth-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top-color: rgba(255, 255, 255, 1);
+  animation: authspin 0.8s linear infinite;
+}
+
+@keyframes authspin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-page--clean .auth-hint {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+/* footer */
+.auth-page--clean .auth-footer.auth-footer--split {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eef2f7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.auth-page--clean .auth-link-btn {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.auth-page--clean .auth-link-btn:hover {
+  text-decoration: underline;
+}
