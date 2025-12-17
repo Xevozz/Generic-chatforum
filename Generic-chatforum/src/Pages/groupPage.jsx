@@ -13,9 +13,8 @@ import CreatePost from "../components/Posts/CreatePost";
 function GroupPage() {
   const { groupId } = useParams();
   const [group, setGroup] = useState(null);
-
-  // ✅ NYT: søgefelt-state til gruppesiden
   const [searchQuery, setSearchQuery] = useState("");
+  const [advancedFilters, setAdvancedFilters] = useState(null);
 
   useEffect(() => {
     if (!groupId) return;
@@ -32,9 +31,9 @@ function GroupPage() {
     return () => unsub();
   }, [groupId]);
 
-
   useEffect(() => {
     setSearchQuery("");
+    setAdvancedFilters(null);
   }, [groupId]);
 
   const title = group?.name || "Gruppe";
@@ -45,6 +44,7 @@ function GroupPage() {
         pageTitle={title}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onApplyAdvancedFilters={setAdvancedFilters}
       />
 
       <div className="layout-grid">
@@ -53,7 +53,11 @@ function GroupPage() {
         <div className="feed">
           <CreatePost fixedGroupId={groupId} hideGroupSelector />
 
-          <PostList groupId={groupId} searchQuery={searchQuery} />
+          <PostList 
+            groupId={groupId} 
+            searchQuery={searchQuery} 
+            advancedFilters={advancedFilters}
+          />
         </div>
 
         <RightPanel />

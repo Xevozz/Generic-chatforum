@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import CreatePostModal from "./CreatePostModal";
+import AdvancedSearchModal from "./AdvancedSearchModal";
 
 import {
   listenToNotifications,
-  markNotificationRead,
   markAllNotificationsRead,
 } from "../services/notificationsService";
 
@@ -14,20 +14,20 @@ function Navbar({
   pageTitle = "Alle opslag",
   searchQuery = "",
   onSearchChange,
+  onApplyAdvancedFilters,
 }) {
   const navigate = useNavigate();
   const { user, profile, logout } = useAuth();
 
   const [isOpen, setOpen] = useState(false);
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
 
-  // 🔔 Notifications state
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
 
   const displayName = profile?.displayName || user?.email || "";
 
-  // 🔔 Live notifications
   useEffect(() => {
     if (!user?.uid) {
       setNotifications([]);
@@ -41,7 +41,6 @@ function Navbar({
     return () => unsub && unsub();
   }, [user?.uid]);
 
-  // 🔔 Luk dropdown ved klik udenfor
   useEffect(() => {
     function handleClickOutside(e) {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
@@ -68,32 +67,15 @@ function Navbar({
     return `${name} interagerede med dit opslag`;
   }
 
-{unreadNotifications.length === 0 ? (
-  <div className="notif-empty">Ingen notifikationer endnu.</div>
-) : (
-  <div className="notif-list">
-    {unreadNotifications.map((n) => (
-      <button
-        key={n.id}
-        type="button"
-        className="notif-item is-unread"
-        onClick={() => handleClickNotification(n)}
-      >
-        <div className="notif-item-text">{notificationText(n)}</div>
-      </button>
-    ))}
-  </div>
-)}
+  async function handleMarkAllRead() {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
 
-async function handleMarkAllRead() {
-  setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-
-  try {
-    if (user?.uid) await markAllNotificationsRead(user.uid);
-  } catch (e) {
-    console.error("Fejl ved markér alle som læst:", e);
+    try {
+      if (user?.uid) await markAllNotificationsRead(user.uid);
+    } catch (e) {
+      console.error("Fejl ved markér alle som læst:", e);
+    }
   }
-}
 
   async function handleLoginLogout() {
     if (user) {
@@ -104,10 +86,16 @@ async function handleMarkAllRead() {
     }
   }
 
+  function handleApplyFilters(filters) {
+    if (onApplyAdvancedFilters) {
+      onApplyAdvancedFilters(filters);
+    }
+    setAdvancedSearchOpen(false);
+  }
+
   return (
     <>
       <header className="navbar">
-        {/* LEFT */}
         <div className="navbar-left">
           <button
             type="button"
@@ -119,16 +107,14 @@ async function handleMarkAllRead() {
           </button>
         </div>
 
-        {/* CENTER */}
         <div className="navbar-center">
           <div className="navbar-page-title navbar-page-title--big">
             {pageTitle}
           </div>
         </div>
 
-        {/* RIGHT */}
         <div className="navbar-right">
-        {user && (
+          {user && (
             <>
               <button
                 className="navbar-profile-btn"
@@ -146,7 +132,6 @@ async function handleMarkAllRead() {
             </>
           )}
 
-          {/* 🔔 Notifications */}
           {user && (
             <div className="notif" ref={notifRef}>
               <button
@@ -176,7 +161,7 @@ async function handleMarkAllRead() {
                     )}
                   </div>
 
-                                    {unreadNotifications.length === 0 ? (
+                  {unreadNotifications.length === 0 ? (
                     <div className="notif-empty">Ingen notifikationer endnu.</div>
                   ) : (
                     <div className="notif-list">
@@ -185,7 +170,6 @@ async function handleMarkAllRead() {
                           key={n.id}
                           type="button"
                           className="notif-item is-unread"
-                          onClick={() => handleClickNotification(n)}
                         >
                           <div className="notif-item-text">{notificationText(n)}</div>
                         </button>
@@ -198,12 +182,22 @@ async function handleMarkAllRead() {
           )}
 
           {typeof onSearchChange === "function" && (
-            <input
-              className="navbar-search navbar-search--right"
-              placeholder="Søg i opslag…"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-            />
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                className="navbar-search navbar-search--right"
+                placeholder="Søg i opslag…"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+              <button
+                className="btn btn-outline"
+                onClick={() => setAdvancedSearchOpen(true)}
+                title="Avanceret søgning"
+                style={{ whiteSpace: "nowrap" }}
+              >
+                🔍 Filter
+              </button>
+            </div>
           )}
 
           {user && (
@@ -222,6 +216,11 @@ async function handleMarkAllRead() {
       </header>
 
       <CreatePostModal isOpen={isOpen} onClose={() => setOpen(false)} />
+      <AdvancedSearchModal
+        isOpen={advancedSearchOpen}
+        onClose={() => setAdvancedSearchOpen(false)}
+        onApplyFilters={handleApplyFilters}
+      />
     </>
   );
 }

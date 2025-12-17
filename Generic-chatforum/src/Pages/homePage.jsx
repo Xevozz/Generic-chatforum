@@ -7,6 +7,7 @@ import PostList from "../components/Posts/PostList";
 
 function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [advancedFilters, setAdvancedFilters] = useState(null);
 
   return (
     <div>
@@ -14,11 +15,12 @@ function HomePage() {
         pageTitle="Alle opslag"
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onApplyAdvancedFilters={setAdvancedFilters}
       />
 
       <Layout>
         <CreatePost />
-        <PostList searchQuery={searchQuery} />
+        <PostList searchQuery={searchQuery} advancedFilters={advancedFilters} />
       </Layout>
     </div>
   );
