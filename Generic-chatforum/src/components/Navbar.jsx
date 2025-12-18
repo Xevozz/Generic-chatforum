@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import CreatePostModal from "./CreatePostModal";
 import AdvancedSearchModal from "./AdvancedSearchModal";
+import PostModal from "./PostModal.jsx";
 
 import {
   listenToNotifications,
   markAllNotificationsRead,
+  markNotificationRead,
 } from "../services/notificationsService";
 
 function Navbar({
@@ -26,6 +28,10 @@ function Navbar({
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
+
+  // PostModal state
+  const [selectedPostId, setSelectedPostId] = useState(null);
+  const [postModalOpen, setPostModalOpen] = useState(false);
 
   const displayName = profile?.displayName || user?.email || "";
 
@@ -58,6 +64,11 @@ function Navbar({
     };
   }, [notifOpen]);
 
+  // ✅ Bulletproof: når vi har et postId, så åbn modal automatisk
+  useEffect(() => {
+    if (selectedPostId) setPostModalOpen(true);
+  }, [selectedPostId]);
+
   const unreadNotifications = notifications.filter((n) => !n.isRead);
   const unreadCount = unreadNotifications.length;
 
@@ -75,6 +86,32 @@ function Navbar({
       if (user?.uid) await markAllNotificationsRead(user.uid);
     } catch (e) {
       console.error("Fejl ved markér alle som læst:", e);
+    }
+  }
+
+  async function handleNotificationClick(notification) {
+    try {
+      // ✅ Korrekt: markNotificationRead tager KUN notificationId
+      if (!notification.isRead) {
+        await markNotificationRead(notification.id);
+
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, isRead: true } : n
+          )
+        );
+      }
+
+      setNotifOpen(false);
+
+      // ✅ Sæt postId (modal åbner via useEffect ovenfor)
+      if (notification.postId) {
+        setSelectedPostId(notification.postId);
+      } else {
+        console.warn("Notifikation mangler postId:", notification);
+      }
+    } catch (error) {
+      console.error("Fejl ved håndtering af notifikation:", error);
     }
   }
 
@@ -136,9 +173,7 @@ function Navbar({
               </button>
 
               {displayName && (
-                <span className="navbar-username-muted">
-                  {displayName}
-                </span>
+                <span className="navbar-username-muted">{displayName}</span>
               )}
             </>
           )}
@@ -181,8 +216,11 @@ function Navbar({
                           key={n.id}
                           type="button"
                           className="notif-item is-unread"
+                          onClick={() => handleNotificationClick(n)}
                         >
-                          <div className="notif-item-text">{notificationText(n)}</div>
+                          <div className="notif-item-text">
+                            {notificationText(n)}
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -231,6 +269,14 @@ function Navbar({
         isOpen={advancedSearchOpen}
         onClose={() => setAdvancedSearchOpen(false)}
         onApplyFilters={handleApplyFilters}
+      />
+      <PostModal
+        postId={selectedPostId}
+        isOpen={postModalOpen}
+        onClose={() => {
+          setPostModalOpen(false);
+          setSelectedPostId(null);
+        }}
       />
     </>
   );

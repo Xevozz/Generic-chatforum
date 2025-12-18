@@ -21,6 +21,20 @@ import {
 const postsRef = collection(db, "posts");
 
 // ======================================================
+// Hent et enkelt opslag via ID
+// ======================================================
+export async function getPostById(postId) {
+  const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+  
+  if (!postSnap.exists()) {
+    return null;
+  }
+  
+  return { id: postSnap.id, ...postSnap.data() };
+}
+
+// ======================================================
 // Opret et nyt opslag
 // ======================================================
 export async function createPost({
