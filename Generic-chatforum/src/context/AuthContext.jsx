@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { subscribeToAuthChanges, logout as logoutFn } from "../services/authService";
-import { getUserByUid } from "../services/userService";
+import { getUserByUid, updateLastActive } from "../services/userService";
 import { db } from "../firebaseConfig";
 import { onSnapshot, doc } from "firebase/firestore";
 
@@ -84,6 +84,21 @@ export function AuthProvider({ children }) {
       applyTheme(DEFAULT_THEME);
     }
   }, [loading, user]);
+
+  // Opdater lastActive hver 2. minut når bruger er logget ind
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    // Opdater med det samme
+    updateLastActive(user.uid);
+
+    // Opdater hver 2. minut
+    const interval = setInterval(() => {
+      updateLastActive(user.uid);
+    }, 120000);
+
+    return () => clearInterval(interval);
+  }, [user?.uid]);
 
   const value = {
     user,

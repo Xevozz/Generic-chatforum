@@ -65,6 +65,29 @@ export async function updateUserProfile(uid, data) {
   });
 }
 
+// Opdater lastActive for online status
+export async function updateLastActive(uid) {
+  try {
+    const userRef = doc(db, "users", uid);
+    await updateDoc(userRef, {
+      lastActive: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Fejl ved opdatering af lastActive:", error);
+  }
+}
+
+// Check om bruger er online (aktiv inden for 5 minutter)
+export function isUserOnline(lastActiveTimestamp) {
+  if (!lastActiveTimestamp) return false;
+  
+  const lastActive = lastActiveTimestamp.toDate?.() || new Date(lastActiveTimestamp);
+  const now = new Date();
+  const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+  
+  return lastActive > fiveMinutesAgo;
+}
+
 // Hent bruger statistikker (posts, kommentarer, aktivitet)
 export async function getUserStats(uid) {
   try {

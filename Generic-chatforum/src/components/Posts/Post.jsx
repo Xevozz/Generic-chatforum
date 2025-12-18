@@ -6,7 +6,7 @@ import {
   listenToComments,
   toggleLike,
 } from "../../services/postsService";
-import { getUserByUid } from "../../services/userService";
+import { getUserByUid, isUserOnline } from "../../services/userService";
 
 function formatDate(value) {
   if (!value) return "";
@@ -137,7 +137,7 @@ function Post({ post }) {
       {/* HEADER */}
       <div className="post-header">
         <div className="post-header-left">
-          <div className="post-avatar">
+          <div className="post-avatar" style={{ position: "relative" }}>
             {authorProfile?.profilePicture ? (
               <img
                 src={authorProfile.profilePicture}
@@ -164,6 +164,23 @@ function Post({ post }) {
               }}>
                 {(authorName || "U").charAt(0).toUpperCase()}
               </div>
+            )}
+
+            {/* Online status indicator */}
+            {authorProfile && isUserOnline(authorProfile.lastActive) && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  width: "14px",
+                  height: "14px",
+                  backgroundColor: "#4caf50",
+                  borderRadius: "50%",
+                  border: "2px solid white",
+                }}
+                title="Online"
+              />
             )}
           </div>
           <div className="post-header-info">
