@@ -15,6 +15,7 @@ function Navbar({
   searchQuery = "",
   onSearchChange,
   onApplyAdvancedFilters,
+  showHomeButton = false,
 }) {
   const navigate = useNavigate();
   const { user, profile, logout } = useAuth();
@@ -97,6 +98,16 @@ function Navbar({
     <>
       <header className="navbar">
         <div className="navbar-left">
+          {showHomeButton && (
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/home")}
+              title="Gå til forsiden"
+              style={{ marginRight: "12px" }}
+            >
+              ← Forside
+            </button>
+          )}
           <button
             type="button"
             className="navbar-app-title-btn"

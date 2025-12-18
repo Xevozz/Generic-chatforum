@@ -8,6 +8,20 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Tema CSS-variabler (standard hvid tema) */
+  --primary-color: #ffffff;
+  --accent-color: #007bff;
+  --card-bg-color: #ffffff;
+  --card-border-color: #e5e7eb;
+  --text-primary: #222;
+  --text-secondary: #666;
+  --button-bg: #2563eb;
+  --button-hover-bg: #1d4ed8;
+  --navbar-bg: #ffffff;
+  --border-color: #d1d5db;
+  --input-bg: #f9fafb;
+  --input-border: #c1c1c1;
 }
 
 a {

@@ -1,5 +1,5 @@
 // src/Pages/groupPage.jsx
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
@@ -12,6 +12,7 @@ import CreatePost from "../components/Posts/CreatePost";
 
 function GroupPage() {
   const { groupId } = useParams();
+  const navigate = useNavigate();
   const [group, setGroup] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [advancedFilters, setAdvancedFilters] = useState(null);
@@ -45,6 +46,7 @@ function GroupPage() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onApplyAdvancedFilters={setAdvancedFilters}
+        showHomeButton={true}
       />
 
       <div className="layout-grid">
