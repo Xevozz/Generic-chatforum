@@ -295,10 +295,16 @@ function Post({ post }) {
                 key={c.id}
                 className="comment-box"
                 style={{
-                  marginLeft: depth > 0 ? "30px" : "0",
-                  backgroundColor: isFromOP ? "rgba(76, 175, 80, 0.08)" : (isReply ? "rgba(200, 200, 200, 0.05)" : "transparent"),
-                  borderLeft: isFromOP ? "3px solid #4caf50" : (isReply ? "2px solid #bbb" : "none"),
-                  paddingLeft: isFromOP ? "12px" : (isReply ? "12px" : "0"),
+                  marginLeft: depth > 0 ? "20px" : "0",
+                  marginBottom: "10px",
+                  padding: "12px 14px",
+                  backgroundColor: isFromOP 
+                    ? "rgba(76, 175, 80, 0.1)" 
+                    : (isReply ? "rgba(33, 150, 243, 0.08)" : "#ffffff"),
+                  border: isFromOP 
+                    ? "2px solid #4caf50" 
+                    : (isReply ? "2px solid #2196F3" : "1px solid #ddd"),
+                  borderRadius: "6px",
                 }}
               >
                 {parentComment && (
