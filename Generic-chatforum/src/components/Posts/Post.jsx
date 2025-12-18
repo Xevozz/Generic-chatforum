@@ -9,6 +9,7 @@ import {
 import { getUserByUid, isUserOnline } from "../../services/userService";
 import { db } from "../../firebaseConfig";
 import { doc, onSnapshot } from "firebase/firestore";
+import UserHoverCard from "../UserHoverCard";
 
 function formatDate(value) {
   if (!value) return "";
@@ -38,8 +39,9 @@ function Post({ post }) {
   const [sending, setSending] = useState(false);
   const [liking, setLiking] = useState(false);
   const [authorProfile, setAuthorProfile] = useState(null);
-  const [replyingTo, setReplyingTo] = useState(null); // { commentId, authorName }
-  const [replyTexts, setReplyTexts] = useState({}); // Store replies per comment
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyTexts, setReplyTexts] = useState({});
+  const [hoverCard, setHoverCard] = useState({ visible: false, userId: null, position: null });
 
   const { user, profile } = useAuth();
 
@@ -173,12 +175,62 @@ function Post({ post }) {
     }
   }
 
+  // --- Handle hover card ---
+  function handleUserHover(e, userId, userName) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    setHoverCard({
+      visible: true,
+      userId,
+      userName,
+      position: {
+        top: rect.bottom + 8,
+        left: rect.left,
+      },
+    });
+  }
+
+  function handleUserLeave() {
+    setHoverCard({ visible: false, userId: null, position: null });
+  }
+
+  function handleHoverCardMouseEnter() {
+    // Når man enter hover card, gør ingenting - hold den åben
+  }
+
+  function handleHoverCardMouseLeave() {
+    // Når man leave hover card, luk den
+    setHoverCard({ visible: false, userId: null, position: null });
+  }
+
   return (
     <div className="post">
       {/* HEADER */}
       <div className="post-header">
-        <div className="post-header-left">
-          <div className="post-avatar" style={{ position: "relative" }}>
+        <div
+          className="post-header-left"
+          onMouseEnter={(e) => handleUserHover(e, post.authorId, authorName)}
+          onMouseLeave={handleUserLeave}
+          style={{
+            cursor: "pointer",
+            display: "flex",
+            gap: "10px",
+            alignItems: "center",
+            padding: "4px",
+            borderRadius: "4px",
+            transition: "background 0.2s ease",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = "#f5f5f5";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = "transparent";
+          }}
+        >
+          <div
+            className="post-avatar"
+            style={{ position: "relative", flexShrink: 0 }}
+          >
             {authorProfile?.profilePicture ? (
               <img
                 src={authorProfile.profilePicture}
@@ -225,7 +277,12 @@ function Post({ post }) {
             )}
           </div>
           <div className="post-header-info">
-            <span className="post-author">{authorName}</span>
+            <span
+              className="post-author"
+              style={{ cursor: "pointer" }}
+            >
+              {authorName}
+            </span>
             {formattedDate && (
               <span className="post-date">{formattedDate}</span>
             )}
@@ -322,7 +379,13 @@ function Post({ post }) {
                   alignItems: "center",
                   gap: "8px",
                 }}>
-                  {c.authorName || "Bruger"}
+                  <span
+                    onMouseEnter={(e) => handleUserHover(e, c.authorId, c.authorName)}
+                    onMouseLeave={handleUserLeave}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {c.authorName || "Bruger"}
+                  </span>
                   {isFromOP && (
                     <span style={{
                       backgroundColor: "#4caf50",
@@ -429,6 +492,22 @@ function Post({ post }) {
           })
         )}
       </div>
+
+      {/* User Hover Card */}
+      {hoverCard.visible && (
+        <div
+          onMouseEnter={handleHoverCardMouseEnter}
+          onMouseLeave={handleHoverCardMouseLeave}
+          style={{ position: "relative" }}
+        >
+          <UserHoverCard
+            userId={hoverCard.userId}
+            userName={hoverCard.userName}
+            isVisible={hoverCard.visible}
+            position={hoverCard.position}
+          />
+        </div>
+      )}
     </div>
   );
 }
