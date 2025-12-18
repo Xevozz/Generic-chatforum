@@ -1,6 +1,7 @@
 // src/components/Posts/Post.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   addCommentToPost,
   listenToComments,
@@ -44,6 +45,7 @@ function Post({ post }) {
   const [hoverCard, setHoverCard] = useState({ visible: false, userId: null, position: null });
 
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
 
   // --- Udregn felter ---
   const authorName =
@@ -279,7 +281,15 @@ function Post({ post }) {
           <div className="post-header-info">
             <span
               className="post-author"
-              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/user/${post.authorId}`)}
+              style={{
+                cursor: "pointer",
+                color: "var(--accent-color)",
+                fontWeight: "600",
+                transition: "opacity 0.2s ease",
+              }}
+              onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
+              onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
             >
               {authorName}
             </span>
@@ -382,7 +392,15 @@ function Post({ post }) {
                   <span
                     onMouseEnter={(e) => handleUserHover(e, c.authorId, c.authorName)}
                     onMouseLeave={handleUserLeave}
-                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate(`/user/${c.authorId}`)}
+                    style={{
+                      cursor: "pointer",
+                      color: "var(--accent-color)",
+                      fontWeight: "600",
+                      transition: "opacity 0.2s ease",
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
+                    onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
                   >
                     {c.authorName || "Bruger"}
                   </span>

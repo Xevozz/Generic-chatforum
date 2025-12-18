@@ -3,6 +3,7 @@ import LoginPage from "./pages/loginPage";
 import CreateUserPage from "./pages/createUser";
 import HomePage from "./pages/homePage";
 import GroupPage from "./pages/groupPage";
+import UserProfile from "./pages/userProfile";
 import { useAuth } from "./context/AuthContext";
 import MyProfile from "./pages/myProfile";
 import "./App.css";
@@ -51,6 +52,15 @@ function App() {
           element={
             <ProtectedRoute>
               <GroupPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/user/:userId"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           }
         />
