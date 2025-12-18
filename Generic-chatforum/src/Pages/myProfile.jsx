@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import PostList from "../components/Posts/PostList";
-import { updateUserProfile, uploadProfilePictureAsBase64 } from "../services/userService";
+import { updateUserProfile, uploadProfilePictureAsBase64, getUserStats } from "../services/userService";
 
 // Foruddefinerede tema-farveskemaer med kontrastfulde farver og konsistent tekst
 const THEME_PRESETS = [
@@ -108,6 +108,7 @@ export default function MyProfile() {
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [showPosts, setShowPosts] = useState(false);
   const [postsPage, setPostsPage] = useState(1);
+  const [userStats, setUserStats] = useState(null);
 
   if (loading) return <p style={{ padding: 16 }}>Indlæser profil…</p>;
   if (!user || !profile) return <p style={{ padding: 16 }}>Du skal være logget ind.</p>;
@@ -138,6 +139,15 @@ export default function MyProfile() {
   useEffect(() => {
     applyTheme(userTheme);
   }, [userTheme]);
+
+  // Hent user stats når komponenten monteres
+  useEffect(() => {
+    const fetchStats = async () => {
+      const stats = await getUserStats(user.uid);
+      setUserStats(stats);
+    };
+    fetchStats();
+  }, [user.uid]);
 
   async function handleThemeChange(theme) {
     setSaving(true);
@@ -304,6 +314,34 @@ export default function MyProfile() {
                 <span className="profile-value">{profile.website || "—"}</span>
               </div>
             </section>
+
+            {userStats && (
+              <section className="profile-card">
+                <h2>Brugeraktivitet</h2>
+
+                <div className="profile-row">
+                  <span className="profile-label">Opslag</span>
+                  <span className="profile-value">{userStats.postCount}</span>
+                </div>
+
+                <div className="profile-row">
+                  <span className="profile-label">Kommentarer</span>
+                  <span className="profile-value">{userStats.commentCount}</span>
+                </div>
+
+                <div className="profile-row">
+                  <span className="profile-label">Samlet aktivitet</span>
+                  <span className="profile-value">{userStats.totalActivity}</span>
+                </div>
+
+                <div className="profile-row">
+                  <span className="profile-label">Medlem siden</span>
+                  <span className="profile-value">
+                    {userStats.memberSinceDate.toLocaleDateString("da-DK")} ({userStats.daysSinceMember} dage)
+                  </span>
+                </div>
+              </section>
+            )}
 
             <section className="profile-card">
               <h2>Temavalg</h2>

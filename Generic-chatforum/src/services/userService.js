@@ -65,6 +65,63 @@ export async function updateUserProfile(uid, data) {
   });
 }
 
+// Hent bruger statistikker (posts, kommentarer, aktivitet)
+export async function getUserStats(uid) {
+  try {
+    // Hent alle posts af brugeren
+    const postsRef = collection(db, "posts");
+    const postsQuery = query(postsRef, where("authorId", "==", uid));
+    const postsSnapshot = await getDocs(postsQuery);
+    const postCount = postsSnapshot.size;
+
+    // Hent alle kommentarer af brugeren
+    const commentsRef = collection(db, "comments");
+    const commentsQuery = query(commentsRef, where("userId", "==", uid));
+    const commentsSnapshot = await getDocs(commentsQuery);
+    const commentCount = commentsSnapshot.size;
+
+    // Hent brugerprofil for createdAt dato
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+    
+    const memberSinceDate = userData?.createdAt?.toDate?.() || new Date();
+    const daysSinceMember = Math.floor((Date.now() - memberSinceDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Beregn aktivitetsbadge baseret på posts + kommentarer
+    const totalActivity = postCount + commentCount;
+    let activityLevel = "Ny bruger";
+    if (daysSinceMember < 30 || totalActivity < 5) {
+      activityLevel = "Ny bruger";
+    } else if (totalActivity < 20) {
+      activityLevel = "Aktiv";
+    } else if (totalActivity < 50) {
+      activityLevel = "Erfaren";
+    } else {
+      activityLevel = "Ekspert";
+    }
+
+    return {
+      postCount,
+      commentCount,
+      totalActivity,
+      memberSinceDate,
+      daysSinceMember,
+      activityLevel,
+    };
+  } catch (error) {
+    console.error("Fejl ved hentning af user stats:", error);
+    return {
+      postCount: 0,
+      commentCount: 0,
+      totalActivity: 0,
+      memberSinceDate: new Date(),
+      daysSinceMember: 0,
+      activityLevel: "Ny bruger",
+    };
+  }
+}
+
 // Upload profilbillede som base64 og gem direkte i Firestore
 export async function uploadProfilePictureAsBase64(uid, file) {
   if (!file) throw new Error("Ingen fil valgt");
