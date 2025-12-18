@@ -7,6 +7,8 @@ import {
   toggleLike,
 } from "../../services/postsService";
 import { getUserByUid, isUserOnline } from "../../services/userService";
+import { db } from "../../firebaseConfig";
+import { doc, onSnapshot } from "firebase/firestore";
 
 function formatDate(value) {
   if (!value) return "";
@@ -85,18 +87,18 @@ function Post({ post }) {
     return () => unsubscribe();
   }, [post.id]);
 
-  // --- Hent forfatter profil for at få billede ---
+  // --- Hent forfatter profil for at få billede og online status (real-time) ---
   useEffect(() => {
-    const fetchAuthorProfile = async () => {
-      if (!post.authorId) return;
-      try {
-        const profile = await getUserByUid(post.authorId);
-        setAuthorProfile(profile);
-      } catch (err) {
-        console.error("Fejl ved hentning af forfatter profil:", err);
+    if (!post.authorId) return;
+    
+    // Brug real-time listener så vi får live updates af lastActive
+    const unsubscribe = onSnapshot(doc(db, "users", post.authorId), (docSnap) => {
+      if (docSnap.exists()) {
+        setAuthorProfile({ id: docSnap.id, ...docSnap.data() });
       }
-    };
-    fetchAuthorProfile();
+    });
+
+    return () => unsubscribe();
   }, [post.authorId]);
 
   // --- Toggle like ---
@@ -241,14 +243,41 @@ function Post({ post }) {
         {comments.length === 0 ? (
           <p className="no-comments">Ingen kommentarer endnu.</p>
         ) : (
-          comments.map((c) => (
-            <div key={c.id} className="comment-box">
-              <div className="comment-author">
-                {c.authorName || "Bruger"}
+          comments.map((c) => {
+            const isFromOP = c.authorId === post.authorId;
+            return (
+              <div
+                key={c.id}
+                className="comment-box"
+                style={{
+                  backgroundColor: isFromOP ? "rgba(76, 175, 80, 0.08)" : "transparent",
+                  borderLeft: isFromOP ? "3px solid #4caf50" : "none",
+                  paddingLeft: isFromOP ? "12px" : "0",
+                }}
+              >
+                <div className="comment-author" style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}>
+                  {c.authorName || "Bruger"}
+                  {isFromOP && (
+                    <span style={{
+                      backgroundColor: "#4caf50",
+                      color: "white",
+                      fontSize: "11px",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      fontWeight: "600",
+                    }}>
+                      OP
+                    </span>
+                  )}
+                </div>
+                <div className="comment-text">{c.text}</div>
               </div>
-              <div className="comment-text">{c.text}</div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

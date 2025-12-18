@@ -85,17 +85,17 @@ export function AuthProvider({ children }) {
     }
   }, [loading, user]);
 
-  // Opdater lastActive hver 2. minut når bruger er logget ind
+  // Opdater lastActive hver 30 sekund når bruger er logget ind
   useEffect(() => {
     if (!user?.uid) return;
 
     // Opdater med det samme
     updateLastActive(user.uid);
 
-    // Opdater hver 2. minut
+    // Opdater hver 30 sekund
     const interval = setInterval(() => {
       updateLastActive(user.uid);
-    }, 120000);
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [user?.uid]);
