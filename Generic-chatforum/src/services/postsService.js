@@ -103,16 +103,23 @@ export async function addCommentToPost(
   postId,
   text,
   authorId = null,
-  authorName = ""
+  authorName = "",
+  parentCommentId = null
 ) {
   const commentsRef = collection(db, "posts", postId, "comments");
 
-  await addDoc(commentsRef, {
+  const commentData = {
     text,
     authorId,
     authorName: authorName || "Ukendt bruger",
     createdAt: serverTimestamp(),
-  });
+  };
+
+  if (parentCommentId) {
+    commentData.parentCommentId = parentCommentId;
+  }
+
+  await addDoc(commentsRef, commentData);
 
   // Notifikation til ejeren
   try {

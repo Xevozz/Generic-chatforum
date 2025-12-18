@@ -38,6 +38,8 @@ function Post({ post }) {
   const [sending, setSending] = useState(false);
   const [liking, setLiking] = useState(false);
   const [authorProfile, setAuthorProfile] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null); // { commentId, authorName }
+  const [replyTexts, setReplyTexts] = useState({}); // Store replies per comment
 
   const { user, profile } = useAuth();
 
@@ -118,17 +120,54 @@ function Post({ post }) {
     }
   }
 
-  // --- Tilføj kommentar ---
+  // --- Tilføj kommentar (eller svar på kommentar) ---
   async function handleSubmit(e) {
     e.preventDefault();
     if (!commentText.trim() || !post.id) return;
 
     setSending(true);
     try {
-      await addCommentToPost(post.id, commentText.trim(), currentUserId, currentUserName);
+      await addCommentToPost(
+        post.id,
+        commentText.trim(),
+        currentUserId,
+        currentUserName,
+        replyingTo?.commentId || null // Pass parent comment ID if replying
+      );
       setCommentText("");
+      setReplyingTo(null);
     } catch (err) {
       console.error("Fejl ved oprettelse af kommentar:", err);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  // --- Håndter svar på kommentar ---
+  function handleReplyClick(commentId, authorName) {
+    setReplyingTo({ commentId, authorName });
+  }
+
+  function cancelReply() {
+    setReplyingTo(null);
+  }
+
+  // --- Send inline reply ---
+  async function handleInlineReply(commentId, authorName, text) {
+    if (!text.trim() || !post.id) return;
+
+    setSending(true);
+    try {
+      await addCommentToPost(
+        post.id,
+        text.trim(),
+        currentUserId,
+        currentUserName,
+        commentId
+      );
+      setReplyingTo(null);
+    } catch (err) {
+      console.error("Fejl ved svar:", err);
     } finally {
       setSending(false);
     }
@@ -221,13 +260,13 @@ function Post({ post }) {
           }
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
-          disabled={!currentUserId}
+          disabled={!currentUserId || replyingTo}
         />
 
         <button
           type="submit"
           className="comment-btn"
-          disabled={sending || !currentUserId}
+          disabled={sending || !currentUserId || replyingTo}
         >
           {sending ? "Sender..." : "Kommentér"}
         </button>
@@ -245,16 +284,33 @@ function Post({ post }) {
         ) : (
           comments.map((c) => {
             const isFromOP = c.authorId === post.authorId;
+            const parentComment = c.parentCommentId
+              ? comments.find((cm) => cm.id === c.parentCommentId)
+              : null;
+            const isReply = !!c.parentCommentId;
+            const depth = isReply ? 1 : 0;
+
             return (
               <div
                 key={c.id}
                 className="comment-box"
                 style={{
-                  backgroundColor: isFromOP ? "rgba(76, 175, 80, 0.08)" : "transparent",
-                  borderLeft: isFromOP ? "3px solid #4caf50" : "none",
-                  paddingLeft: isFromOP ? "12px" : "0",
+                  marginLeft: depth > 0 ? "30px" : "0",
+                  backgroundColor: isFromOP ? "rgba(76, 175, 80, 0.08)" : (isReply ? "rgba(200, 200, 200, 0.05)" : "transparent"),
+                  borderLeft: isFromOP ? "3px solid #4caf50" : (isReply ? "2px solid #bbb" : "none"),
+                  paddingLeft: isFromOP ? "12px" : (isReply ? "12px" : "0"),
                 }}
               >
+                {parentComment && (
+                  <div style={{
+                    fontSize: "11px",
+                    color: "#666",
+                    marginBottom: "4px",
+                    fontStyle: "italic",
+                  }}>
+                    ↳ Svar til @{parentComment.authorName}
+                  </div>
+                )}
                 <div className="comment-author" style={{
                   display: "flex",
                   alignItems: "center",
@@ -275,6 +331,93 @@ function Post({ post }) {
                   )}
                 </div>
                 <div className="comment-text">{c.text}</div>
+                {currentUserId && replyingTo?.commentId !== c.id && (
+                  <button
+                    type="button"
+                    onClick={() => handleReplyClick(c.id, c.authorName)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--accent-color)",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      marginTop: "4px",
+                      padding: "0",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Svar
+                  </button>
+                )}
+
+                {/* Inline reply input */}
+                {replyingTo?.commentId === c.id && currentUserId && (
+                  <div style={{
+                    display: "flex",
+                    gap: "8px",
+                    marginTop: "8px",
+                    alignItems: "center",
+                  }}>
+                    <input
+                      type="text"
+                      placeholder={`Svar til @${c.authorName}...`}
+                      defaultValue=""
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && e.target.value.trim()) {
+                          handleInlineReply(c.id, c.authorName, e.target.value);
+                          e.target.value = "";
+                        }
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "6px 10px",
+                        border: "1px solid #ddd",
+                        borderRadius: "6px",
+                        fontSize: "13px",
+                        fontFamily: "inherit",
+                      }}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        const input = e.currentTarget.previousElementSibling;
+                        if (input.value.trim()) {
+                          handleInlineReply(c.id, c.authorName, input.value);
+                          input.value = "";
+                        }
+                      }}
+                      disabled={sending}
+                      style={{
+                        padding: "6px 16px",
+                        backgroundColor: "var(--accent-color)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: sending ? "not-allowed" : "pointer",
+                        fontSize: "12px",
+                        opacity: sending ? 0.6 : 1,
+                      }}
+                    >
+                      {sending ? "Sender..." : "Svar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelReply}
+                      style={{
+                        padding: "6px 10px",
+                        backgroundColor: "#f0f0f0",
+                        color: "#666",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                      }}
+                    >
+                      Annuller
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })
