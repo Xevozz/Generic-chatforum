@@ -64,3 +64,42 @@ export async function updateUserProfile(uid, data) {
     updatedAt: serverTimestamp(),
   });
 }
+
+// Upload profilbillede som base64 og gem direkte i Firestore
+export async function uploadProfilePictureAsBase64(uid, file) {
+  if (!file) throw new Error("Ingen fil valgt");
+
+  // Validér filtype
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Filen skal være et billede");
+  }
+
+  // Validér filstørrelse (max 500KB for base64)
+  if (file.size > 500 * 1024) {
+    throw new Error("Billedet må ikke være større end 500KB");
+  }
+
+  // Konvertér fil til base64
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+      try {
+        const base64String = reader.result;
+        
+        // Gem base64 string direkte i Firestore
+        await updateUserProfile(uid, { profilePicture: base64String });
+        
+        resolve(base64String);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Fejl ved læsning af billedefil"));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}

@@ -6,6 +6,7 @@ import {
   listenToComments,
   toggleLike,
 } from "../../services/postsService";
+import { getUserByUid } from "../../services/userService";
 
 function formatDate(value) {
   if (!value) return "";
@@ -34,6 +35,7 @@ function Post({ post }) {
   const [commentText, setCommentText] = useState("");
   const [sending, setSending] = useState(false);
   const [liking, setLiking] = useState(false);
+  const [authorProfile, setAuthorProfile] = useState(null);
 
   const { user, profile } = useAuth();
 
@@ -83,6 +85,20 @@ function Post({ post }) {
     return () => unsubscribe();
   }, [post.id]);
 
+  // --- Hent forfatter profil for at få billede ---
+  useEffect(() => {
+    const fetchAuthorProfile = async () => {
+      if (!post.authorId) return;
+      try {
+        const profile = await getUserByUid(post.authorId);
+        setAuthorProfile(profile);
+      } catch (err) {
+        console.error("Fejl ved hentning af forfatter profil:", err);
+      }
+    };
+    fetchAuthorProfile();
+  }, [post.authorId]);
+
   // --- Toggle like ---
   async function handleLike() {
     if (!post.id || !currentUserId) return;
@@ -121,7 +137,35 @@ function Post({ post }) {
       {/* HEADER */}
       <div className="post-header">
         <div className="post-header-left">
-          <div className="post-avatar" />
+          <div className="post-avatar">
+            {authorProfile?.profilePicture ? (
+              <img
+                src={authorProfile.profilePicture}
+                alt={authorName}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                backgroundColor: "var(--accent-color)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontSize: "18px",
+                fontWeight: "bold",
+              }}>
+                {(authorName || "U").charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
           <div className="post-header-info">
             <span className="post-author">{authorName}</span>
             {formattedDate && (

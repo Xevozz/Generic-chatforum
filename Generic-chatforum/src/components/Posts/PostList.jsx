@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { listenToAllPosts, listenToPostsByGroup } from "../../services/postsService";
 import Post from "./Post";
 
-function PostList({ groupId, searchQuery = "", advancedFilters = null }) {
+function PostList({ groupId, searchQuery = "", advancedFilters = null, limit = null, page = 1, onPageChange = null }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -83,14 +83,77 @@ function PostList({ groupId, searchQuery = "", advancedFilters = null }) {
     visiblePosts.sort((a, b) => (b.likedBy?.length || 0) - (a.likedBy?.length || 0));
   }
 
+  // Pagination
+  let displayPosts = visiblePosts;
+  let totalPages = 1;
+  if (limit) {
+    totalPages = Math.ceil(visiblePosts.length / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    displayPosts = visiblePosts.slice(startIndex, endIndex);
+  }
+
   if (loading && !posts.length) return <p>Henter opslag...</p>;
   if (!visiblePosts.length) return <p>Ingen opslag matcher din søgning.</p>;
 
   return (
-    <div className="post-list">
-      {visiblePosts.map((p) => (
-        <Post key={p.id} post={p} />
-      ))}
+    <div>
+      <div className="post-list">
+        {displayPosts.map((p) => (
+          <Post key={p.id} post={p} />
+        ))}
+      </div>
+
+      {/* Pagination buttons */}
+      {limit && totalPages > 1 && (
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "12px",
+          marginTop: "20px",
+          paddingTop: "20px",
+          borderTop: "1px solid var(--border-color)",
+        }}>
+          <button
+            onClick={() => onPageChange && onPageChange(page - 1)}
+            disabled={page === 1}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: page === 1 ? "#ccc" : "var(--button-bg)",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: page === 1 ? "not-allowed" : "pointer",
+            }}
+          >
+            ← Forrige
+          </button>
+
+          <span style={{
+            display: "flex",
+            alignItems: "center",
+            fontSize: "14px",
+            color: "var(--text-secondary)",
+          }}>
+            Side {page} af {totalPages}
+          </span>
+
+          <button
+            onClick={() => onPageChange && onPageChange(page + 1)}
+            disabled={page === totalPages}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: page === totalPages ? "#ccc" : "var(--button-bg)",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: page === totalPages ? "not-allowed" : "pointer",
+            }}
+          >
+            Næste →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

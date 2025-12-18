@@ -244,7 +244,7 @@ function Navbar({
                 title="Avanceret søgning"
                 style={{ whiteSpace: "nowrap" }}
               >
-                🔍 Filter
+                🔍 Filtrer Søgning
               </button>
             </div>
           )}

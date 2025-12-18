@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import PostList from "../components/Posts/PostList";
-import { updateUserProfile } from "../services/userService";
+import { updateUserProfile, uploadProfilePictureAsBase64 } from "../services/userService";
 
 // Foruddefinerede tema-farveskemaer med kontrastfulde farver og konsistent tekst
 const THEME_PRESETS = [
@@ -104,6 +104,10 @@ export default function MyProfile() {
   const { user, profile, loading } = useAuth();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [showPictureModal, setShowPictureModal] = useState(false);
+  const [showPosts, setShowPosts] = useState(false);
+  const [postsPage, setPostsPage] = useState(1);
 
   if (loading) return <p style={{ padding: 16 }}>Indlæser profil…</p>;
   if (!user || !profile) return <p style={{ padding: 16 }}>Du skal være logget ind.</p>;
@@ -151,6 +155,26 @@ export default function MyProfile() {
       setSaving(false);
     }
   }
+
+  async function handleProfilePictureUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setMessage("");
+
+    try {
+      await uploadProfilePictureAsBase64(user.uid, file);
+      setMessage("Profilbillede uploadet!");
+      // Reset input
+      event.target.value = "";
+    } catch (err) {
+      console.error("Fejl ved upload af billede:", err);
+      setMessage(err.message || "Fejl ved upload af billede.");
+    } finally {
+      setUploading(false);
+    }
+  }
   const initials =
     (profile.displayName || email || "U")
       .split(" ")
@@ -168,10 +192,55 @@ export default function MyProfile() {
           {/* Header card */}
           <section className="profile-hero">
             <div className="profile-hero-left">
-              <div className="profile-avatar">{initials}</div>
+              <div 
+                className="profile-avatar" 
+                style={{ position: "relative", cursor: "pointer" }}
+                onClick={() => profile.profilePicture && setShowPictureModal(true)}
+              >
+                {profile.profilePicture ? (
+                  <img
+                    src={profile.profilePicture}
+                    alt={profile.displayName}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  initials
+                )}
+              </div>
               <div className="profile-hero-text">
                 <h1 className="profile-name">{profile.displayName}</h1>
                 <p className="profile-sub">{email}</p>
+                {uploading && <p style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Uploader...</p>}
+                <label
+                  htmlFor="profile-pic-upload"
+                  style={{
+                    marginTop: "8px",
+                    display: "inline-block",
+                    padding: "6px 12px",
+                    backgroundColor: "var(--button-bg)",
+                    color: "white",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    border: "none",
+                  }}
+                  title="Skift profilbillede"
+                >
+                  📷 Skift billede
+                </label>
+                <input
+                  id="profile-pic-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePictureUpload}
+                  disabled={uploading}
+                  style={{ display: "none" }}
+                />
               </div>
             </div>
 
@@ -289,14 +358,95 @@ export default function MyProfile() {
           <section className="profile-card">
             <div className="profile-card-head">
               <h2>Mine opslag</h2>
-              <span className="profile-muted">Seneste aktivitet</span>
+              <button
+                onClick={() => {
+                  setShowPosts(!showPosts);
+                  setPostsPage(1); // Reset til første side når man åbner
+                }}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: showPosts ? "var(--button-hover-bg)" : "var(--button-bg)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                }}
+              >
+                {showPosts ? "▼ Skjul opslag" : "▶ Se mine opslag"}
+              </button>
             </div>
 
-            {/* Midlertidigt: bruger din eksisterende PostList */}
-            <PostList />
+            {showPosts && (
+              <div>
+                <PostList limit={10} page={postsPage} onPageChange={setPostsPage} />
+              </div>
+            )}
           </section>
         </div>
       </Layout>
+
+      {/* Modal til at vise billede i fuld størrelse */}
+      {showPictureModal && profile.profilePicture && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            cursor: "pointer",
+          }}
+          onClick={() => setShowPictureModal(false)}
+        >
+          <div
+            style={{
+              position: "relative",
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+              cursor: "default",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={profile.profilePicture}
+              alt={profile.displayName}
+              style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "8px",
+                objectFit: "contain",
+              }}
+            />
+            <button
+              onClick={() => setShowPictureModal(false)}
+              style={{
+                position: "absolute",
+                top: "-40px",
+                right: 0,
+                backgroundColor: "white",
+                border: "none",
+                borderRadius: "50%",
+                width: "36px",
+                height: "36px",
+                fontSize: "20px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              title="Luk"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
