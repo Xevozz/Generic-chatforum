@@ -11,16 +11,18 @@ function UserHoverCard({ userId, userName, isVisible, position }) {
       return;
     }
 
+    console.log(`[UserHoverCard] Fetching stats for userId: ${userId}`);
     setLoading(true);
+    setStats(null);
     
-    // Fetch user profile
-    getUserByUid(userId)
-      .then((profile) => {
+    // Fetch both in parallel for faster loading
+    Promise.all([
+      getUserByUid(userId),
+      getUserStats(userId)
+    ])
+      .then(([profile, statsData]) => {
+        console.log(`[UserHoverCard] Got stats: posts=${statsData?.postCount}, comments=${statsData?.commentCount}`);
         setUserProfile(profile);
-        // Then fetch stats
-        return getUserStats(userId);
-      })
-      .then((statsData) => {
         setStats(statsData);
       })
       .catch((err) => {

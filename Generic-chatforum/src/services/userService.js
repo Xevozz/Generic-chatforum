@@ -88,20 +88,52 @@ export function isUserOnline(lastActiveTimestamp) {
   return lastActive > fiveMinutesAgo;
 }
 
+// Cache for user stats (expires after 5 minutes)
+const statsCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Clear cache (for debugging)
+export function clearStatsCache() {
+  statsCache.clear();
+  console.log("[getUserStats] Cache cleared");
+}
+
 // Hent bruger statistikker (posts, kommentarer, aktivitet)
 export async function getUserStats(uid) {
   try {
+    // Check cache first
+    const cached = statsCache.get(uid);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log(`[getUserStats] Returning cached stats for user ${uid}`);
+      return cached.data;
+    }
+
     // Hent alle posts af brugeren
     const postsRef = collection(db, "posts");
     const postsQuery = query(postsRef, where("authorId", "==", uid));
     const postsSnapshot = await getDocs(postsQuery);
     const postCount = postsSnapshot.size;
+    
+    console.log(`[getUserStats] Found ${postCount} posts for user ${uid}`);
 
-    // Hent alle kommentarer af brugeren
-    const commentsRef = collection(db, "comments");
-    const commentsQuery = query(commentsRef, where("userId", "==", uid));
-    const commentsSnapshot = await getDocs(commentsQuery);
-    const commentCount = commentsSnapshot.size;
+    // Hent alle kommentarer af brugeren fra alle posts
+    let commentCount = 0;
+    const allPostsRef = collection(db, "posts");
+    const allPostsSnapshot = await getDocs(allPostsRef);
+    
+    console.log(`[getUserStats] Scanning ${allPostsSnapshot.size} posts for comments by user ${uid}`);
+    
+    for (const postDoc of allPostsSnapshot.docs) {
+      const commentsRef = collection(db, "posts", postDoc.id, "comments");
+      const commentsQuery = query(commentsRef, where("authorId", "==", uid));
+      const commentsSnapshot = await getDocs(commentsQuery);
+      if (commentsSnapshot.size > 0) {
+        console.log(`[getUserStats] Found ${commentsSnapshot.size} comments in post ${postDoc.id}`);
+      }
+      commentCount += commentsSnapshot.size;
+    }
+    
+    console.log(`[getUserStats] Total comment count for user ${uid}: ${commentCount}`);
 
     // Hent brugerprofil for createdAt dato
     const userRef = doc(db, "users", uid);
@@ -124,7 +156,7 @@ export async function getUserStats(uid) {
       activityLevel = "Ekspert";
     }
 
-    return {
+    const result = {
       postCount,
       commentCount,
       totalActivity,
@@ -132,6 +164,12 @@ export async function getUserStats(uid) {
       daysSinceMember,
       activityLevel,
     };
+
+    // Cache the result
+    statsCache.set(uid, { data: result, timestamp: Date.now() });
+    console.log(`[getUserStats] Result for user ${uid}: ${postCount} posts, ${commentCount} comments`);
+
+    return result;
   } catch (error) {
     console.error("Fejl ved hentning af user stats:", error);
     return {

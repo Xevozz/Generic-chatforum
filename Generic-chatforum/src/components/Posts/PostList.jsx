@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { listenToAllPosts, listenToPostsByGroup } from "../../services/postsService";
 import Post from "./Post";
 
-function PostList({ groupId, searchQuery = "", advancedFilters = null, limit = null, page = 1, onPageChange = null }) {
+function PostList({ groupId, searchQuery = "", advancedFilters = null, limit = null, page = 1, onPageChange = null, userId = null }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,6 +28,11 @@ function PostList({ groupId, searchQuery = "", advancedFilters = null, limit = n
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   let visiblePosts = posts.filter((p) => {
+    // Filter by userId if provided (for user profiles)
+    if (userId && p.authorId !== userId) {
+      return false;
+    }
+
     if (normalizedQuery.length > 0) {
       const title = (p.title || "").toLowerCase();
       const content = (p.content || p.Content || p.text || "").toLowerCase();
