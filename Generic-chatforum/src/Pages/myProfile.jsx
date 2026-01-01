@@ -109,6 +109,15 @@ export default function MyProfile() {
   const [showPosts, setShowPosts] = useState(false);
   const [postsPage, setPostsPage] = useState(1);
   const [userStats, setUserStats] = useState(null);
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [editingContact, setEditingContact] = useState(false);
+  const [formData, setFormData] = useState({
+    displayName: profile?.displayName || "",
+    about: profile?.about || "",
+    phone: profile?.phone || "",
+    city: profile?.city || "",
+    website: profile?.website || "",
+  });
 
   if (loading) return <p style={{ padding: 16 }}>Indlæser profil…</p>;
   if (!user || !profile) return <p style={{ padding: 16 }}>Du skal være logget ind.</p>;
@@ -149,6 +158,19 @@ export default function MyProfile() {
     fetchStats();
   }, [user.uid]);
 
+  // Opdater formData når profil ændres
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        displayName: profile.displayName || "",
+        about: profile.about || "",
+        phone: profile.phone || "",
+        city: profile.city || "",
+        website: profile.website || "",
+      });
+    }
+  }, [profile]);
+
   async function handleThemeChange(theme) {
     setSaving(true);
     setMessage("");
@@ -183,6 +205,67 @@ export default function MyProfile() {
       setMessage(err.message || "Fejl ved upload af billede.");
     } finally {
       setUploading(false);
+    }
+  }
+
+  function handleFormChange(field, value) {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }
+
+  async function handleSaveInfo() {
+    setSaving(true);
+    setMessage("");
+
+    try {
+      await updateUserProfile(user.uid, {
+        displayName: formData.displayName,
+        about: formData.about,
+      });
+      setMessage("Brugeroplysninger gemt!");
+      setEditingInfo(false);
+    } catch (err) {
+      console.error("Fejl ved gemning af brugeroplysninger:", err);
+      setMessage("Fejl ved gemning af brugeroplysninger.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSaveContact() {
+    setSaving(true);
+    setMessage("");
+
+    try {
+      await updateUserProfile(user.uid, {
+        phone: formData.phone,
+        city: formData.city,
+        website: formData.website,
+      });
+      setMessage("Kontaktoplysninger gemt!");
+      setEditingContact(false);
+    } catch (err) {
+      console.error("Fejl ved gemning af kontaktoplysninger:", err);
+      setMessage("Fejl ved gemning af kontaktoplysninger.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleCancelEdit() {
+    setEditingInfo(false);
+    setEditingContact(false);
+    // Genindlæs original data
+    if (profile) {
+      setFormData({
+        displayName: profile.displayName || "",
+        about: profile.about || "",
+        phone: profile.phone || "",
+        city: profile.city || "",
+        website: profile.website || "",
+      });
     }
   }
   const initials =
@@ -271,48 +354,251 @@ export default function MyProfile() {
           {/* Info cards */}
           <div className="profile-grid">
             <section className="profile-card">
-              <h2>Brugeroplysninger</h2>
-
-              <div className="profile-row">
-                <span className="profile-label">Navn</span>
-                <span className="profile-value">{profile.displayName}</span>
+              <div className="profile-card-head">
+                <h2>Brugeroplysninger</h2>
+                <button
+                  onClick={() => editingInfo ? handleCancelEdit() : setEditingInfo(true)}
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: editingInfo ? "#f44336" : "var(--button-bg)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                >
+                  {editingInfo ? "Annuller" : "✏️ Rediger"}
+                </button>
               </div>
 
-              <div className="profile-row">
-                <span className="profile-label">Email</span>
-                <span className="profile-value">{email}</span>
-              </div>
+              {editingInfo ? (
+                <div className="profile-form">
+                  <div className="form-group">
+                    <label>Navn</label>
+                    <input
+                      type="text"
+                      value={formData.displayName}
+                      onChange={(e) => handleFormChange("displayName", e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: "var(--input-bg)",
+                        color: "var(--text-primary)",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
 
-              <div className="profile-row profile-row--stack">
-                <span className="profile-label">Om mig</span>
-                <span className="profile-value">
-                  {profile.about?.trim() ? profile.about : "—"}
-                </span>
-              </div>
+                  <div className="form-group">
+                    <label>Om mig</label>
+                    <textarea
+                      value={formData.about}
+                      onChange={(e) => handleFormChange("about", e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: "var(--input-bg)",
+                        color: "var(--text-primary)",
+                        boxSizing: "border-box",
+                        minHeight: "80px",
+                        fontFamily: "inherit",
+                        resize: "vertical",
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                    <button
+                      onClick={handleSaveInfo}
+                      disabled={saving}
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: saving ? "#ccc" : "#4caf50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: saving ? "not-allowed" : "pointer",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {saving ? "Gemmer..." : "Gem"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="profile-row">
+                    <span className="profile-label">Navn</span>
+                    <span className="profile-value">{profile.displayName}</span>
+                  </div>
+
+                  <div className="profile-row">
+                    <span className="profile-label">Email</span>
+                    <span className="profile-value">{email}</span>
+                  </div>
+
+                  <div className="profile-row profile-row--stack">
+                    <span className="profile-label">Om mig</span>
+                    <span className="profile-value">
+                      {profile.about?.trim() ? profile.about : "—"}
+                    </span>
+                  </div>
+                </>
+              )}
             </section>
 
             <section className="profile-card">
-              <h2>Kontakt</h2>
-
-              <div className="profile-row">
-                <span className="profile-label">Email</span>
-                <span className="profile-value">{email}</span>
+              <div className="profile-card-head">
+                <h2>Kontakt</h2>
+                <button
+                  onClick={() => editingContact ? handleCancelEdit() : setEditingContact(true)}
+                  style={{
+                    padding: "6px 12px",
+                    backgroundColor: editingContact ? "#f44336" : "var(--button-bg)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                >
+                  {editingContact ? "Annuller" : "✏️ Rediger"}
+                </button>
               </div>
 
-              <div className="profile-row">
-                <span className="profile-label">Telefon</span>
-                <span className="profile-value">{profile.phone || "—"}</span>
-              </div>
+              {editingContact ? (
+                <div className="profile-form">
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      disabled
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: "#f5f5f5",
+                        color: "var(--text-primary)",
+                        boxSizing: "border-box",
+                        cursor: "not-allowed",
+                      }}
+                    />
+                    <small style={{ color: "var(--text-secondary)", marginTop: "4px" }}>
+                      Email kan ikke ændres
+                    </small>
+                  </div>
 
-              <div className="profile-row">
-                <span className="profile-label">By</span>
-                <span className="profile-value">{profile.city || "—"}</span>
-              </div>
+                  <div className="form-group">
+                    <label>Telefon</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => handleFormChange("phone", e.target.value)}
+                      placeholder="Fx +45 12 34 56 78"
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: "var(--input-bg)",
+                        color: "var(--text-primary)",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
 
-              <div className="profile-row">
-                <span className="profile-label">Website</span>
-                <span className="profile-value">{profile.website || "—"}</span>
-              </div>
+                  <div className="form-group">
+                    <label>By</label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => handleFormChange("city", e.target.value)}
+                      placeholder="Fx København"
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: "var(--input-bg)",
+                        color: "var(--text-primary)",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Website</label>
+                    <input
+                      type="url"
+                      value={formData.website}
+                      onChange={(e) => handleFormChange("website", e.target.value)}
+                      placeholder="Fx https://example.com"
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: "1px solid var(--border-color)",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: "var(--input-bg)",
+                        color: "var(--text-primary)",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                    <button
+                      onClick={handleSaveContact}
+                      disabled={saving}
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: saving ? "#ccc" : "#4caf50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: saving ? "not-allowed" : "pointer",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {saving ? "Gemmer..." : "Gem"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="profile-row">
+                    <span className="profile-label">Email</span>
+                    <span className="profile-value">{email}</span>
+                  </div>
+
+                  <div className="profile-row">
+                    <span className="profile-label">Telefon</span>
+                    <span className="profile-value">{profile.phone || "—"}</span>
+                  </div>
+
+                  <div className="profile-row">
+                    <span className="profile-label">By</span>
+                    <span className="profile-value">{profile.city || "—"}</span>
+                  </div>
+
+                  <div className="profile-row">
+                    <span className="profile-label">Website</span>
+                    <span className="profile-value">{profile.website || "—"}</span>
+                  </div>
+                </>
+              )}
             </section>
 
             {userStats && (
