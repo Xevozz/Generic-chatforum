@@ -76,3 +76,43 @@ export async function markAllNotificationsRead(toUserId) {
   snap.docs.forEach((d) => batch.update(d.ref, { isRead: true }));
   await batch.commit();
 }
+
+export async function createChatNotification({
+  toUserId,
+  fromUserId,
+  fromUserName,
+  messagePreview,
+}) {
+  const cleanToUserId = (toUserId || "").trim();
+  if (!cleanToUserId) return;
+
+  await addDoc(collection(db, "notifications"), {
+    toUserId: cleanToUserId,
+    fromUserId: fromUserId || null,
+    fromUserName: (fromUserName || "Ukendt bruger").trim(),
+    type: "chat",
+    messagePreview: (messagePreview || "").substring(0, 50),
+    isRead: false,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export function listenToChatNotifications(toUserId, callback) {
+  if (!toUserId) {
+    callback([]);
+    return () => {};
+  }
+
+  const q = query(
+    collection(db, "notifications"),
+    where("toUserId", "==", toUserId),
+    where("type", "==", "chat"),
+    orderBy("createdAt", "desc"),
+    limit(50)
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    callback(items);
+  });
+}

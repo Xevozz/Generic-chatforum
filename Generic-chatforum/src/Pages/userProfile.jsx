@@ -1,17 +1,31 @@
 // src/pages/userProfile.jsx
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Layout from "../components/Layout";
 import PostList from "../components/Posts/PostList";
+import ChatModal from "../components/ChatModal";
 import { getUserByUid, getUserStats } from "../services/userService";
+import { useAuth } from "../context/AuthContext";
 
 function UserProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, profile } = useAuth();
   const [userProfile, setUserProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+
+  // Tjek om chat skal åbnes fra notifikation
+  useEffect(() => {
+    if (location.state?.openChat && !loading) {
+      setChatOpen(true);
+      // Slet state så det ikke åbner igen ved reload
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state?.openChat, loading]);
 
   useEffect(() => {
     if (!userId) {
@@ -24,12 +38,12 @@ function UserProfile() {
       getUserByUid(userId),
       getUserStats(userId),
     ])
-      .then(([profile, userStats]) => {
-        if (!profile) {
+      .then(([profileData, userStats]) => {
+        if (!profileData) {
           navigate("/home");
           return;
         }
-        setUserProfile(profile);
+        setUserProfile(profileData);
         setStats(userStats);
       })
       .catch((err) => {
@@ -157,6 +171,7 @@ function UserProfile() {
                   display: "grid",
                   gridTemplateColumns: "repeat(3, 1fr)",
                   gap: "12px",
+                  marginBottom: "16px",
                 }}
               >
                 <div
@@ -255,13 +270,39 @@ function UserProfile() {
 
               <p
                 style={{
-                  margin: "16px 0 0",
+                  margin: "0 0 16px",
                   fontSize: "12px",
                   color: "#999",
                 }}
               >
                 Medlem siden {memberSinceDate}
               </p>
+
+              {/* Action Button */}
+              {user && user.uid !== userId && (
+                <button
+                  onClick={() => setChatOpen(true)}
+                  style={{
+                    padding: "10px 16px",
+                    backgroundColor: "var(--button-bg)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    transition: "background 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = "var(--button-hover-bg)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = "var(--button-bg)";
+                  }}
+                >
+                  💬 Send besked
+                </button>
+              )}
             </div>
           </div>
 
@@ -281,8 +322,18 @@ function UserProfile() {
           </div>
         </div>
       </Layout>
+
+      {/* Chat Modal */}
+      <ChatModal
+        user={user}
+        profile={profile}
+        otherUser={userProfile}
+        isOpen={chatOpen}
+        onClose={() => setChatOpen(false)}
+      />
     </>
   );
 }
 
 export default UserProfile;
+

@@ -5,12 +5,17 @@ import { useAuth } from "../context/AuthContext";
 import CreatePostModal from "./CreatePostModal";
 import AdvancedSearchModal from "./AdvancedSearchModal";
 import PostModal from "./PostModal.jsx";
+import NotificationBanner from "./NotificationBanner";
+import ChatsList from "./ChatsList";
+import ChatModal from "./ChatModal";
 
 import {
   listenToNotifications,
   markAllNotificationsRead,
   markNotificationRead,
 } from "../services/notificationsService";
+import { getUserByUid } from "../services/userService";
+import { subscribeToUserChats } from "../services/chatService";
 
 function Navbar({
   pageTitle = "Alle opslag",
@@ -29,9 +34,19 @@ function Navbar({
   const [notifications, setNotifications] = useState([]);
   const notifRef = useRef(null);
 
+  // Banner notifikation state
+  const [bannerNotif, setBannerNotif] = useState(null);
+
   // PostModal state
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [postModalOpen, setPostModalOpen] = useState(false);
+
+  // ChatsList state
+  const [chatsListOpen, setChatsListOpen] = useState(false);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [totalUnreadChats, setTotalUnreadChats] = useState(0);
+  const [chats, setChats] = useState([]);
 
   const displayName = profile?.displayName || user?.email || "";
 
@@ -41,7 +56,21 @@ function Navbar({
       return;
     }
 
-    const unsub = listenToNotifications(user.uid, setNotifications, {
+    const unsub = listenToNotifications(user.uid, (newNotifications) => {
+      // Tjek hvis nye chat-notifikationer er kommet
+      const newChatNotifs = newNotifications.filter(n => n.type === 'chat' && !n.isRead);
+      if (newChatNotifs.length > 0) {
+        const newest = newChatNotifs[0];
+        setBannerNotif({
+          id: newest.id,
+          message: `💬 ${newest.fromUserName} sendte dig en besked`,
+          type: 'chat',
+          notification: newest,
+        });
+      }
+
+      setNotifications(newNotifications);
+    }, {
       limit: 25,
     });
 
@@ -69,6 +98,22 @@ function Navbar({
     if (selectedPostId) setPostModalOpen(true);
   }, [selectedPostId]);
 
+  // Listen til chats for at tælle ulæste beskeder
+  useEffect(() => {
+    if (!user?.uid) {
+      setTotalUnreadChats(0);
+      return;
+    }
+
+    const unsubscribe = subscribeToUserChats(user.uid, (chatsList) => {
+      setChats(chatsList);
+      const totalUnread = chatsList.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0);
+      setTotalUnreadChats(totalUnread);
+    });
+
+    return () => unsubscribe?.();
+  }, [user?.uid]);
+
   const unreadNotifications = notifications.filter((n) => !n.isRead);
   const unreadCount = unreadNotifications.length;
 
@@ -76,6 +121,7 @@ function Navbar({
     const name = n.fromUserName || "Ukendt bruger";
     if (n.type === "comment") return `${name} kommenterede dit opslag`;
     if (n.type === "like") return `${name} likede dit opslag`;
+    if (n.type === "chat") return `💬 ${name} sendte dig en besked`;
     return `${name} interagerede med dit opslag`;
   }
 
@@ -104,11 +150,20 @@ function Navbar({
 
       setNotifOpen(false);
 
-      // ✅ Sæt postId (modal åbner via useEffect ovenfor)
-      if (notification.postId) {
+      // ✅ Hvis det er en chat-notifikation, åbn chat-modalet direkte
+      if (notification.type === 'chat' && notification.fromUserId) {
+        const otherUser = await getUserByUid(notification.fromUserId);
+        setSelectedChat({
+          chatId: null,
+          otherUser: otherUser || { displayName: 'Ukendt', id: notification.fromUserId },
+          otherUserId: notification.fromUserId
+        });
+        setChatModalOpen(true);
+      } else if (notification.postId) {
+        // ✅ Sæt postId (modal åbner via useEffect)
         setSelectedPostId(notification.postId);
       } else {
-        console.warn("Notifikation mangler postId:", notification);
+        console.warn("Notifikation mangler type og data:", notification);
       }
     } catch (error) {
       console.error("Fejl ved håndtering af notifikation:", error);
@@ -129,6 +184,26 @@ function Navbar({
       onApplyAdvancedFilters(filters);
     }
     setAdvancedSearchOpen(false);
+  }
+
+  function handleChatNotificationClick() {
+    if (bannerNotif?.notification?.fromUserId) {
+      // Markér som læst
+      if (bannerNotif.notification.id && user?.uid) {
+        markNotificationRead(bannerNotif.notification.id).catch(e => console.error(e));
+      }
+      // Navigér til brugerens profil med flag for at åbne chat
+      navigate(`/user/${bannerNotif.notification.fromUserId}`, { 
+        state: { openChat: true } 
+      });
+      setBannerNotif(null);
+    }
+  }
+
+  function handleChatSelected(chatInfo) {
+    setSelectedChat(chatInfo);
+    setChatModalOpen(true);
+    setChatsListOpen(false);
   }
 
   return (
@@ -153,6 +228,39 @@ function Navbar({
           >
             Chat Forum
           </button>
+          {user && (
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <button
+                className="btn btn-outline"
+                onClick={() => setChatsListOpen(true)}
+                title="Se alle dine beskeder"
+                style={{ marginLeft: "12px" }}
+              >
+                💬 Beskeder
+              </button>
+              {totalUnreadChats > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-8px",
+                    right: "-8px",
+                    backgroundColor: "var(--accent-color)",
+                    color: "white",
+                    borderRadius: "50%",
+                    width: "24px",
+                    height: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                  }}
+                >
+                  {totalUnreadChats}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="navbar-center">
@@ -278,6 +386,48 @@ function Navbar({
           setSelectedPostId(null);
         }}
       />
+
+      {/* Chat Notification Banner */}
+      {bannerNotif && (
+        <NotificationBanner
+          message={bannerNotif.message}
+          type="chat"
+          duration={5000}
+          onClick={handleChatNotificationClick}
+          onClose={() => {
+            setBannerNotif(null);
+            // Markér som læst
+            if (bannerNotif.notification?.id && user?.uid) {
+              markNotificationRead(bannerNotif.notification.id).catch(e => console.error(e));
+            }
+          }}
+        />
+      )}
+
+      {/* ChatsList Modal */}
+      {user && (
+        <ChatsList
+          user={user}
+          profile={profile}
+          isOpen={chatsListOpen}
+          onClose={() => setChatsListOpen(false)}
+          onSelectChat={handleChatSelected}
+        />
+      )}
+
+      {/* ChatModal for selected chat */}
+      {user && selectedChat && (
+        <ChatModal
+          user={user}
+          profile={profile}
+          otherUser={selectedChat.otherUser}
+          isOpen={chatModalOpen}
+          onClose={() => {
+            setChatModalOpen(false);
+            setSelectedChat(null);
+          }}
+        />
+      )}
     </>
   );
 }
