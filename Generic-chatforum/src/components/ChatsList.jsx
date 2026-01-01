@@ -25,7 +25,8 @@ function ChatsList({ user, profile, isOpen, onClose, onSelectChat }) {
           // For hver chat, hent info om den anden bruger
           const chatsWithUsers = await Promise.all(
             chatsList.map(async (chat) => {
-              const otherUserId = chat.participants.find(id => id !== user.uid);
+              // otherUserId er allerede beregnet af subscribeToUserChats
+              const otherUserId = chat.otherUserId;
               const otherUser = await getUserByUid(otherUserId);
               
               return {

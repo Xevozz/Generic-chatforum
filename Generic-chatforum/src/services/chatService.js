@@ -146,9 +146,12 @@ export async function markChatAsRead(chatId, userId) {
 // Real-time listener på alle chats for en bruger
 export function subscribeToUserChats(userId, callback) {
   if (!userId) {
+    console.log("No userId provided to subscribeToUserChats");
     callback([]);
     return () => {};
   }
+
+  console.log("subscribeToUserChats - listening for userId:", userId);
 
   const chatsRef = collection(db, "chats");
   const q = query(
@@ -158,23 +161,28 @@ export function subscribeToUserChats(userId, callback) {
   );
 
   const unreadListeners = new Map();
-  let isInitialized = false;
 
-  // Listen til chats
-  const chatsUnsub = onSnapshot(q, (snapshot) => {
-    const chatIds = new Set();
+  const chatsUnsub = onSnapshot(
+    q,
+    (snapshot) => {
+      console.log("subscribeToUserChats - chats snapshot received, docs count:", snapshot.docs.length);
 
-    // Opbyg chats med unread count
-    const processChats = async () => {
-      const chatsWithUnread = await Promise.all(
-        snapshot.docs.map(async (doc) => {
-          const chatId = doc.id;
-          const chatData = doc.data();
-          const otherUserId = chatData.participants.find(id => id !== userId);
+      if (snapshot.docs.length === 0) {
+        console.log("No chats found for user");
+        callback([]);
+        return;
+      }
 
-          chatIds.add(chatId);
+      // Process each chat
+      const chatsWithUnread = snapshot.docs.map((doc) => {
+        const chatId = doc.id;
+        const chatData = doc.data();
+        const otherUserId = chatData.participants.find((id) => id !== userId);
 
-          // Hent ulæste messages for denne chat
+        console.log("Processing chat:", chatId, "with other user:", otherUserId);
+
+        // Setup real-time listener for unread messages if not already done
+        if (!unreadListeners.has(chatId)) {
           const messagesRef = collection(db, "chats", chatId, "messages");
           const unreadQuery = query(
             messagesRef,
@@ -182,58 +190,63 @@ export function subscribeToUserChats(userId, callback) {
             where("senderId", "==", otherUserId)
           );
 
-          const unreadSnapshot = await getDocs(unreadQuery);
+          const unreadUnsub = onSnapshot(
+            unreadQuery,
+            (unreadSnapshot) => {
+              console.log(`Chat ${chatId} unread count:`, unreadSnapshot.size);
+              // Trigger full refresh when unread status changes
+              onSnapshot(q, (refreshSnapshot) => {
+                const updated = refreshSnapshot.docs.map((refreshDoc) => {
+                  const chatId2 = refreshDoc.id;
+                  const otherUserId2 = refreshDoc.data().participants.find((id) => id !== userId);
+                  let unreadCount = 0;
 
-          // Setup real-time listener hvis ikke allerede gjort
-          if (!unreadListeners.has(chatId)) {
-            const unreadUnsub = onSnapshot(unreadQuery, () => {
-              // Når messages ændres, refresh hele listen
-              processChats();
-            });
-            unreadListeners.set(chatId, unreadUnsub);
-          }
+                  // Count unread synchronously from cache
+                  unreadListeners.forEach((_, cid) => {
+                    if (cid === chatId2) {
+                      unreadCount = unreadSnapshot.size;
+                    }
+                  });
 
-          return {
-            id: chatId,
-            ...chatData,
-            unreadCount: unreadSnapshot.size,
-            otherUserId,
-          };
-        })
-      );
+                  return {
+                    id: chatId2,
+                    ...refreshDoc.data(),
+                    otherUserId: otherUserId2,
+                    unreadCount,
+                  };
+                });
+                callback(updated);
+              });
+            },
+            (error) => {
+              console.error("Unread listener error for chat", chatId, ":", error);
+            }
+          );
 
-      // Cleanup listeners for deleted chats
-      for (const [chatId, unsub] of unreadListeners.entries()) {
-        if (!chatIds.has(chatId)) {
-          unsub();
-          unreadListeners.delete(chatId);
+          unreadListeners.set(chatId, unreadUnsub);
         }
-      }
 
-      // Callback med data
+        return {
+          id: chatId,
+          ...chatData,
+          otherUserId,
+          unreadCount: 0, // Will be updated by unread listener
+        };
+      });
+
+      console.log("Initial chats with data:", chatsWithUnread.length);
       callback(chatsWithUnread);
-      isInitialized = true;
-    };
-
-    processChats().catch(err => {
-      console.error("Fejl ved processing af chats:", err);
-      if (!isInitialized) {
-        callback([]);
-        isInitialized = true;
-      }
-    });
-  }, (error) => {
-    console.error("Fejl ved real-time chats listener:", error);
-    if (!isInitialized) {
+    },
+    (error) => {
+      console.error("Fejl ved real-time chats listener:", error);
       callback([]);
-      isInitialized = true;
     }
-  });
+  );
 
-  // Return cleanup function
   return () => {
+    console.log("Cleaning up subscribeToUserChats");
     chatsUnsub();
-    unreadListeners.forEach(unsub => unsub());
+    unreadListeners.forEach((unsub) => unsub());
     unreadListeners.clear();
   };
 }
