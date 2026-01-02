@@ -97,6 +97,21 @@ export async function deletePost(postId) {
 }
 
 // ======================================================
+// Opdater opslag
+// ======================================================
+export async function updatePost(postId, { title, content }) {
+  const postRef = doc(db, "posts", postId);
+  const combinedText = title ? `${title}\n\n${content}` : content;
+  
+  await updateDoc(postRef, {
+    title: title || null,
+    content: content.trim(),
+    Content: combinedText.trim(), // legacy field
+    updatedAt: serverTimestamp(),
+  });
+}
+
+// ======================================================
 // Tilføj kommentar + notifikation
 // ======================================================
 export async function addCommentToPost(

@@ -12,6 +12,7 @@ import { db } from "../../firebaseConfig";
 import { doc, onSnapshot } from "firebase/firestore";
 import UserHoverCard from "../UserHoverCard";
 import ReportModal from "../ReportModal";
+import EditPostModal from "../EditPostModal";
 
 function formatDate(value) {
   if (!value) return "";
@@ -45,6 +46,7 @@ function Post({ post }) {
   const [replyTexts, setReplyTexts] = useState({});
   const [hoverCard, setHoverCard] = useState({ visible: false, userId: null, position: null });
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -340,6 +342,41 @@ function Post({ post }) {
           {sending ? "Sender..." : "Kommentér"}
         </button>
 
+        {/* Rediger knap - kun synlig for ejeren */}
+        {currentUserId && currentUserId === post.authorId && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setEditModalOpen(true);
+            }}
+            title="Rediger opslag"
+            style={{
+              backgroundColor: "transparent",
+              border: "1px solid var(--card-border-color)",
+              borderRadius: "6px",
+              padding: "6px 10px",
+              cursor: "pointer",
+              color: "var(--text-secondary)",
+              fontSize: "14px",
+              transition: "all 0.2s ease",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+              e.currentTarget.style.borderColor = "#3b82f6";
+              e.currentTarget.style.color = "#3b82f6";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.borderColor = "var(--card-border-color)";
+              e.currentTarget.style.color = "var(--text-secondary)";
+            }}
+          >
+            ✏️
+          </button>
+        )}
+
         {/* Rapportér knap */}
         {currentUserId && currentUserId !== post.authorId && (
           <button
@@ -571,6 +608,13 @@ function Post({ post }) {
         post={post}
         user={user}
         profile={profile}
+      />
+
+      {/* Edit Post Modal */}
+      <EditPostModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        post={post}
       />
     </div>
   );
