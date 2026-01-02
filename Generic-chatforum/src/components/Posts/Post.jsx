@@ -11,6 +11,7 @@ import { getUserByUid, isUserOnline } from "../../services/userService";
 import { db } from "../../firebaseConfig";
 import { doc, onSnapshot } from "firebase/firestore";
 import UserHoverCard from "../UserHoverCard";
+import ReportModal from "../ReportModal";
 
 function formatDate(value) {
   if (!value) return "";
@@ -43,6 +44,7 @@ function Post({ post }) {
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyTexts, setReplyTexts] = useState({});
   const [hoverCard, setHoverCard] = useState({ visible: false, userId: null, position: null });
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -337,6 +339,41 @@ function Post({ post }) {
         >
           {sending ? "Sender..." : "Kommentér"}
         </button>
+
+        {/* Rapportér knap */}
+        {currentUserId && currentUserId !== post.authorId && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setReportModalOpen(true);
+            }}
+            title="Rapportér opslag"
+            style={{
+              backgroundColor: "transparent",
+              border: "1px solid var(--card-border-color)",
+              borderRadius: "6px",
+              padding: "6px 10px",
+              cursor: "pointer",
+              color: "var(--text-secondary)",
+              fontSize: "14px",
+              transition: "all 0.2s ease",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
+              e.currentTarget.style.borderColor = "var(--error-color, #ef4444)";
+              e.currentTarget.style.color = "var(--error-color, #ef4444)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.borderColor = "var(--card-border-color)";
+              e.currentTarget.style.color = "var(--text-secondary)";
+            }}
+          >
+            ⚠️
+          </button>
+        )}
       </form>
 
       {/* VIS HVEM DER HAR LIKET */}
@@ -526,6 +563,15 @@ function Post({ post }) {
           />
         </div>
       )}
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        post={post}
+        user={user}
+        profile={profile}
+      />
     </div>
   );
 }

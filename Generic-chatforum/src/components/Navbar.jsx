@@ -16,6 +16,7 @@ import {
 } from "../services/notificationsService";
 import { getUserByUid } from "../services/userService";
 import { subscribeToUserChats } from "../services/chatService";
+import { checkIsAdmin } from "../services/reportService";
 
 function Navbar({
   pageTitle = "Alle opslag",
@@ -47,8 +48,22 @@ function Navbar({
   const [selectedChat, setSelectedChat] = useState(null);
   const [totalUnreadChats, setTotalUnreadChats] = useState(0);
   const [chats, setChats] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const displayName = profile?.displayName || user?.email || "";
+
+  // Check admin status
+  useEffect(() => {
+    async function checkAdmin() {
+      if (!user?.uid) {
+        setIsAdmin(false);
+        return;
+      }
+      const adminStatus = await checkIsAdmin(user.uid);
+      setIsAdmin(adminStatus);
+    }
+    checkAdmin();
+  }, [user?.uid]);
 
   useEffect(() => {
     if (!user?.uid) {
@@ -272,6 +287,20 @@ function Navbar({
         <div className="navbar-right">
           {user && (
             <>
+              {isAdmin && (
+                <button
+                  className="btn btn-outline"
+                  onClick={() => navigate("/admin")}
+                  title="Admin Panel"
+                  style={{
+                    backgroundColor: "rgba(239, 68, 68, 0.1)",
+                    borderColor: "var(--error-color, #ef4444)",
+                    color: "var(--error-color, #ef4444)",
+                  }}
+                >
+                  🛡️ Admin
+                </button>
+              )}
               <button
                 className="navbar-profile-btn"
                 onClick={() => navigate("/my-profile")}

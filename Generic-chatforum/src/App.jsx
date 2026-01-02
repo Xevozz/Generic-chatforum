@@ -4,6 +4,7 @@ import CreateUserPage from "./pages/createUser";
 import HomePage from "./pages/homePage";
 import GroupPage from "./pages/groupPage";
 import UserProfile from "./pages/userProfile";
+import AdminPage from "./pages/adminPage";
 import { useAuth } from "./context/AuthContext";
 import MyProfile from "./pages/myProfile";
 import "./App.css";
@@ -61,6 +62,15 @@ function App() {
           element={
             <ProtectedRoute>
               <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminPage />
             </ProtectedRoute>
           }
         />
