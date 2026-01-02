@@ -6,6 +6,7 @@ import {
   addCommentToPost,
   listenToComments,
   toggleLike,
+  deletePost,
 } from "../../services/postsService";
 import { getUserByUid, isUserOnline } from "../../services/userService";
 import { db } from "../../firebaseConfig";
@@ -47,6 +48,8 @@ function Post({ post }) {
   const [hoverCard, setHoverCard] = useState({ visible: false, userId: null, position: null });
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -209,10 +212,27 @@ function Post({ post }) {
     setHoverCard({ visible: false, userId: null, position: null });
   }
 
+  // Handle delete post
+  async function handleDeletePost() {
+    if (!window.confirm("Er du sikker på at du vil slette dette opslag permanent?")) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      await deletePost(post.id);
+      setMenuOpen(false);
+    } catch (err) {
+      console.error("Fejl ved sletning af opslag:", err);
+      alert("Der opstod en fejl ved sletning af opslaget.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="post">
       {/* HEADER */}
-      <div className="post-header">
+      <div className="post-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div
           className="post-header-left"
           onMouseEnter={(e) => handleUserHover(e, post.authorId, authorName)}
@@ -302,6 +322,177 @@ function Post({ post }) {
             )}
           </div>
         </div>
+
+        {/* Three-dot menu */}
+        {currentUserId && (
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuOpen(!menuOpen);
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "8px",
+                borderRadius: "50%",
+                fontSize: "18px",
+                color: "var(--text-secondary)",
+                transition: "all 0.2s ease",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--input-bg)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
+              title="Flere muligheder"
+            >
+              ⋯
+            </button>
+
+            {/* Dropdown menu */}
+            {menuOpen && (
+              <>
+                {/* Backdrop to close menu */}
+                <div
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 99,
+                  }}
+                  onClick={() => setMenuOpen(false)}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    right: 0,
+                    backgroundColor: "var(--card-bg-color)",
+                    border: "1px solid var(--card-border-color)",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                    minWidth: "180px",
+                    zIndex: 100,
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Rediger - kun for ejeren */}
+                  {currentUserId === post.authorId && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        setEditModalOpen(true);
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        width: "100%",
+                        padding: "12px 16px",
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        color: "var(--text-primary)",
+                        textAlign: "left",
+                        transition: "background 0.15s ease",
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = "var(--input-bg)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      <span>✏️</span>
+                      <span>Rediger opslag</span>
+                    </button>
+                  )}
+
+                  {/* Slet - kun for ejeren */}
+                  {currentUserId === post.authorId && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePost();
+                      }}
+                      disabled={deleting}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        width: "100%",
+                        padding: "12px 16px",
+                        border: "none",
+                        backgroundColor: "transparent",
+                        cursor: deleting ? "not-allowed" : "pointer",
+                        fontSize: "14px",
+                        color: "#ef4444",
+                        textAlign: "left",
+                        transition: "background 0.15s ease",
+                        opacity: deleting ? 0.6 : 1,
+                      }}
+                      onMouseOver={(e) => {
+                        if (!deleting) e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                      }}
+                    >
+                      <span>🗑️</span>
+                      <span>{deleting ? "Sletter..." : "Slet opslag"}</span>
+                    </button>
+                  )}
+
+                  {/* Divider hvis både ejer og anmeld vises */}
+                  {currentUserId === post.authorId && currentUserId !== post.authorId ? null : 
+                    currentUserId !== post.authorId && (
+                      <>
+                        {/* Rapportér - kun for andre brugere */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMenuOpen(false);
+                            setReportModalOpen(true);
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            width: "100%",
+                            padding: "12px 16px",
+                            border: "none",
+                            backgroundColor: "transparent",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            color: "var(--text-primary)",
+                            textAlign: "left",
+                            transition: "background 0.15s ease",
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "var(--input-bg)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent";
+                          }}
+                        >
+                          <span>⚠️</span>
+                          <span>Anmeld opslag</span>
+                        </button>
+                      </>
+                    )
+                  }
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* TEKST: titel + beskrivelse */}
@@ -342,75 +533,6 @@ function Post({ post }) {
           {sending ? "Sender..." : "Kommentér"}
         </button>
 
-        {/* Rediger knap - kun synlig for ejeren */}
-        {currentUserId && currentUserId === post.authorId && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setEditModalOpen(true);
-            }}
-            title="Rediger opslag"
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid var(--card-border-color)",
-              borderRadius: "6px",
-              padding: "6px 10px",
-              cursor: "pointer",
-              color: "var(--text-secondary)",
-              fontSize: "14px",
-              transition: "all 0.2s ease",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
-              e.currentTarget.style.borderColor = "#3b82f6";
-              e.currentTarget.style.color = "#3b82f6";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.borderColor = "var(--card-border-color)";
-              e.currentTarget.style.color = "var(--text-secondary)";
-            }}
-          >
-            ✏️
-          </button>
-        )}
-
-        {/* Rapportér knap */}
-        {currentUserId && currentUserId !== post.authorId && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              setReportModalOpen(true);
-            }}
-            title="Rapportér opslag"
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid var(--card-border-color)",
-              borderRadius: "6px",
-              padding: "6px 10px",
-              cursor: "pointer",
-              color: "var(--text-secondary)",
-              fontSize: "14px",
-              transition: "all 0.2s ease",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.1)";
-              e.currentTarget.style.borderColor = "var(--error-color, #ef4444)";
-              e.currentTarget.style.color = "var(--error-color, #ef4444)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-              e.currentTarget.style.borderColor = "var(--card-border-color)";
-              e.currentTarget.style.color = "var(--text-secondary)";
-            }}
-          >
-            ⚠️
-          </button>
-        )}
       </form>
 
       {/* VIS HVEM DER HAR LIKET */}
