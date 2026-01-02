@@ -235,14 +235,6 @@ function Navbar({
               ← Forside
             </button>
           )}
-          <button
-            type="button"
-            className="navbar-app-title-btn"
-            onClick={() => navigate("/home")}
-            title="Gå til forsiden"
-          >
-            Chat Forum
-          </button>
           {user && (
             <div style={{ position: "relative", display: "inline-block" }}>
               <button
