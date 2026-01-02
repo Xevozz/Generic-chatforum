@@ -1,21 +1,58 @@
 // src/components/Posts/PostList.jsx
 import { useEffect, useState } from "react";
-import { listenToAllPosts, listenToPostsByGroup } from "../../services/postsService";
+import { listenToAllPosts, listenToPostsByGroup, listenToPostsByUserGroups } from "../../services/postsService";
+import { listenToUserGroups } from "../../services/groupService";
+import { useAuth } from "../../context/AuthContext";
 import Post from "./Post";
 
-function PostList({ groupId, searchQuery = "", advancedFilters = null, limit = null, page = 1, onPageChange = null, userId = null }) {
+function PostList({ groupId, searchQuery = "", advancedFilters = null, limit = null, page = 1, onPageChange = null, userId = null, showAllUserGroupPosts = false }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userGroupIds, setUserGroupIds] = useState([]);
+  const { user } = useAuth();
+
+  // Hent brugerens gruppe-IDs
+  useEffect(() => {
+    if (!user?.uid || groupId || userId) {
+      setUserGroupIds([]);
+      return;
+    }
+
+    const unsub = listenToUserGroups(user.uid, (groups) => {
+      const ids = groups.map((g) => g.id);
+      setUserGroupIds(ids);
+    });
+
+    return () => unsub();
+  }, [user?.uid, groupId, userId]);
 
   useEffect(() => {
     let unsub;
 
     if (groupId) {
+      // Specifik gruppe
       unsub = listenToPostsByGroup(groupId, (data) => {
         setPosts(data);
         setLoading(false);
       });
+    } else if (userId) {
+      // Bruger-profil (alle opslag fra den bruger)
+      unsub = listenToAllPosts((data) => {
+        setPosts(data);
+        setLoading(false);
+      });
+    } else if (showAllUserGroupPosts && userGroupIds.length > 0) {
+      // Vis kun opslag fra brugerens grupper
+      unsub = listenToPostsByUserGroups(userGroupIds, (data) => {
+        setPosts(data);
+        setLoading(false);
+      });
+    } else if (showAllUserGroupPosts && userGroupIds.length === 0) {
+      // Bruger er ikke medlem af nogen grupper
+      setPosts([]);
+      setLoading(false);
     } else {
+      // Fallback til alle opslag
       unsub = listenToAllPosts((data) => {
         setPosts(data);
         setLoading(false);
@@ -23,7 +60,7 @@ function PostList({ groupId, searchQuery = "", advancedFilters = null, limit = n
     }
 
     return () => unsub && unsub();
-  }, [groupId]);
+  }, [groupId, userId, showAllUserGroupPosts, userGroupIds]);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
 

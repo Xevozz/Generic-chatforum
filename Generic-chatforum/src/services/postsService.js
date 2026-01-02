@@ -74,6 +74,28 @@ export function listenToAllPosts(callback) {
 }
 
 // ======================================================
+// Lyt til opslag fra brugerens grupper
+// ======================================================
+export function listenToPostsByUserGroups(groupIds, callback) {
+  // Hvis brugeren ikke er medlem af nogen grupper, returner tom liste
+  if (!groupIds || groupIds.length === 0) {
+    callback([]);
+    return () => {};
+  }
+
+  const q = query(postsRef, orderBy("createdAt", "desc"));
+  
+  return onSnapshot(q, (snapshot) => {
+    const allPosts = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Filtrer kun opslag fra brugerens grupper
+    const filteredPosts = allPosts.filter((post) => 
+      post.groupId && groupIds.includes(post.groupId)
+    );
+    callback(filteredPosts);
+  });
+}
+
+// ======================================================
 // Lyt til opslag i en specifik gruppe
 // ======================================================
 export function listenToPostsByGroup(groupId, callback) {

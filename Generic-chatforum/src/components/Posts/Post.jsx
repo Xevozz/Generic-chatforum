@@ -9,6 +9,7 @@ import {
   deletePost,
 } from "../../services/postsService";
 import { getUserByUid, isUserOnline } from "../../services/userService";
+import { getGroupById } from "../../services/groupService";
 import { db } from "../../firebaseConfig";
 import { doc, onSnapshot } from "firebase/firestore";
 import UserHoverCard from "../UserHoverCard";
@@ -50,6 +51,7 @@ function Post({ post }) {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [groupName, setGroupName] = useState(null);
 
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -113,6 +115,27 @@ function Post({ post }) {
 
     return () => unsubscribe();
   }, [post.authorId]);
+
+  // --- Hent gruppe navn ---
+  useEffect(() => {
+    if (!post.groupId) {
+      setGroupName(null);
+      return;
+    }
+
+    async function fetchGroupName() {
+      try {
+        const group = await getGroupById(post.groupId);
+        if (group) {
+          setGroupName(group.name);
+        }
+      } catch (err) {
+        console.error("Fejl ved hentning af gruppe:", err);
+      }
+    }
+
+    fetchGroupName();
+  }, [post.groupId]);
 
   // --- Toggle like ---
   async function handleLike() {
@@ -231,6 +254,45 @@ function Post({ post }) {
 
   return (
     <div className="post">
+      {/* GRUPPE BADGE - vises øverst hvis opslaget tilhører en gruppe */}
+      {groupName && (
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "12px",
+            paddingBottom: "12px",
+            borderBottom: "1px solid var(--card-border-color)",
+          }}
+        >
+          <span
+            onClick={() => navigate(`/groups/${post.groupId}`)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "4px 12px",
+              borderRadius: "20px",
+              backgroundColor: "var(--input-bg)",
+              fontSize: "12px",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--accent-color)";
+              e.currentTarget.style.color = "white";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--input-bg)";
+              e.currentTarget.style.color = "var(--text-secondary)";
+            }}
+          >
+            <span>📁</span>
+            <span>{groupName}</span>
+          </span>
+        </div>
+      )}
+
       {/* HEADER */}
       <div className="post-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div

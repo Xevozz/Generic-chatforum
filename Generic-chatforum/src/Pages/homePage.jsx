@@ -12,7 +12,7 @@ function HomePage() {
   return (
     <div>
       <Navbar
-        pageTitle="Alle opslag"
+        pageTitle="Mit feed"
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onApplyAdvancedFilters={setAdvancedFilters}
@@ -20,7 +20,11 @@ function HomePage() {
 
       <Layout>
         <CreatePost />
-        <PostList searchQuery={searchQuery} advancedFilters={advancedFilters} />
+        <PostList 
+          searchQuery={searchQuery} 
+          advancedFilters={advancedFilters} 
+          showAllUserGroupPosts={true}
+        />
       </Layout>
     </div>
   );

@@ -1,7 +1,7 @@
 // src/components/Posts/CreatePost.jsx
 import { useState, useEffect } from "react";
 import { createPost } from "../../services/postsService";
-import { listenToGroups } from "../../services/groupService";
+import { listenToUserGroups } from "../../services/groupService";
 import { useAuth } from "../../context/AuthContext";
 
 function CreatePost({
@@ -17,13 +17,18 @@ function CreatePost({
 
   const { user, profile } = useAuth();
 
-  // Hent grupper (stadig relevant hvis man er på /home og dropdown vises)
+  // Hent KUN grupper brugeren er medlem af
   useEffect(() => {
-    const unsub = listenToGroups((loadedGroups) => {
+    if (!user?.uid) {
+      setGroups([]);
+      return;
+    }
+
+    const unsub = listenToUserGroups(user.uid, (loadedGroups) => {
       setGroups(loadedGroups);
     });
     return () => unsub();
-  }, []);
+  }, [user?.uid]);
 
   // ✅ Auto-vælg gruppen, når man er inde i en gruppe-side
   useEffect(() => {
