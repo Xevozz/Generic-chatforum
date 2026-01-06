@@ -74,8 +74,31 @@ function Sidebar() {
   
   return (
     <aside className="sidebar">
+      {/* Mit feed - adskilt fra grupper */}
+      <Link
+        to="/home"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "10px 12px",
+          marginBottom: "16px",
+          borderRadius: "10px",
+          background: isAllPostsActive ? "var(--accent-color)" : "var(--input-bg)",
+          color: isAllPostsActive ? "white" : "inherit",
+          textDecoration: "none",
+          fontWeight: "600",
+          fontSize: "14px",
+          transition: "all 0.2s ease",
+        }}
+      >
+        <span style={{ fontSize: "16px" }}>📰</span>
+        Mit feed
+      </Link>
+
+      {/* Mine Grupper header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-        <h3 style={{ margin: 0 }}>Mine Grupper</h3>
+        <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "600", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Mine Grupper</h3>
         <button
           onClick={() => setExploreModalOpen(true)}
           title="Udforsk grupper"
@@ -96,19 +119,6 @@ function Sidebar() {
       </div>
       
       <ul>
-        <li>
-          <Link
-            to="/home"
-            style={{
-              fontWeight: isAllPostsActive ? "700" : "400",
-              color: isAllPostsActive ? "var(--accent-color)" : "inherit",
-              opacity: isAllPostsActive ? "1" : "0.7",
-            }}
-          >
-            📰 Mit feed
-          </Link>
-        </li>
-
         {groups.length === 0 && user?.uid && (
           <li style={{ 
             padding: "12px 0", 

@@ -30,65 +30,87 @@ function AdvancedSearchModal({ isOpen, onClose, onApplyFilters }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Avanceret søgning</h2>
+        <h2>🔍 Søg i opslag</h2>
 
         <div>
           <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-            Søg efter keywords
+            Søgeord
           </label>
           <input
             type="text"
-            placeholder="Fx: JavaScript, design, projekter..."
+            placeholder="Søg efter titler, beskrivelser, forfattere..."
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
-            style={{ marginBottom: 14 }}
+            autoFocus
+            style={{ 
+              marginBottom: 8,
+              padding: "12px 14px",
+              fontSize: "15px",
+            }}
           />
-          <p style={{ fontSize: 12, color: "#94a3b8", margin: "0 0 14px" }}>
-            Søger i titler, beskrivelser og forfatternavn
-          </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          <div>
-            <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-              Fra dato
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+        {/* Avancerede filtre - collapsible */}
+        <details style={{ marginTop: "16px" }}>
+          <summary style={{ 
+            cursor: "pointer", 
+            fontWeight: 600, 
+            color: "var(--text-secondary)",
+            fontSize: "13px",
+            marginBottom: "12px",
+          }}>
+            ⚙️ Avancerede filtre
+          </summary>
+          
+          <div style={{ 
+            padding: "12px",
+            background: "var(--input-bg)",
+            borderRadius: "8px",
+            marginTop: "8px",
+          }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={{ fontWeight: 600, marginBottom: 6, display: "block", fontSize: "13px" }}>
+                  Fra dato
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontWeight: 600, marginBottom: 6, display: "block", fontSize: "13px" }}>
+                  Til dato
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: 14 }}>
+              <label style={{ fontWeight: 600, marginBottom: 6, display: "block", fontSize: "13px" }}>
+                Sortering
+              </label>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                <option value="newest">Nyeste først</option>
+                <option value="oldest">Ældste først</option>
+                <option value="most-liked">Mest liket</option>
+              </select>
+            </div>
           </div>
-
-          <div>
-            <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-              Til dato
-            </label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div style={{ marginTop: 14 }}>
-          <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-            Sortering
-          </label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="newest">Nyeste først</option>
-            <option value="oldest">Ældste først</option>
-            <option value="most-liked">Mest liket</option>
-          </select>
-        </div>
+        </details>
 
         <div className="modal-buttons">
           <button onClick={handleReset} style={{ marginRight: "auto" }}>
             Nulstil
           </button>
           <button onClick={onClose}>Annuller</button>
-          <button onClick={handleApply}>Anvend filtrer</button>
+          <button onClick={handleApply} className="btn btn-primary">Søg</button>
         </div>
       </div>
     </div>

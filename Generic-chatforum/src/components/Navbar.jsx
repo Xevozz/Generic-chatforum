@@ -360,27 +360,18 @@ function Navbar({
           )}
 
           {typeof onSearchChange === "function" && (
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <input
-                className="navbar-search navbar-search--right"
-                placeholder="Søg i opslag…"
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-              />
-              <button
-                className="btn btn-outline"
-                onClick={() => setAdvancedSearchOpen(true)}
-                title="Avanceret søgning"
-                style={{ whiteSpace: "nowrap" }}
-              >
-                🔍 Filtrer Søgning
-              </button>
-            </div>
-          )}
-
-          {user && (
-            <button className="btn btn-outline" onClick={() => setOpen(true)}>
-              Lav opslag
+            <button
+              className="btn btn-outline"
+              onClick={() => setAdvancedSearchOpen(true)}
+              title="Søg i opslag"
+              style={{ 
+                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              🔍 Søg i opslag
             </button>
           )}
 
