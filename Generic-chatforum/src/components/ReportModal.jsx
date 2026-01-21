@@ -1,4 +1,7 @@
 // src/components/ReportModal.jsx
+// ======================================================
+// Modal til rapportering af upassende opslag
+// ======================================================
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { createReport } from "../services/reportService";

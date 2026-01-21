@@ -1,4 +1,7 @@
 // src/Pages/adminPage.jsx
+// ======================================================
+// Admin-side til håndtering af rapporterede opslag
+// ======================================================
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";

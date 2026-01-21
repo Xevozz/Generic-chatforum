@@ -15,8 +15,9 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
+// ======================================================
 // Opretter / overskriver en bruger i DB'en
-// bruger id = authUser.uid
+// ======================================================
 export async function createUserDocument(uid, data) {
   const userRef = doc(db, "users", uid);
 
@@ -33,9 +34,9 @@ export async function createUserDocument(uid, data) {
   return userRef;
 }
 
-
-//Henter brugerprofil ud fra user-id
-
+// ======================================================
+// Henter brugerprofil ud fra user-id
+// ======================================================
 export async function getUserByUid(uid) {
   const userRef = doc(db, "users", uid);
   const snap = await getDoc(userRef);
@@ -43,8 +44,9 @@ export async function getUserByUid(uid) {
   return { id: snap.id, ...snap.data() };
 }
 
-
-//Hent brugerprofil ud fra brugernavn (displayName / username)
+// ======================================================
+// Hent brugerprofil ud fra brugernavn
+// ======================================================
 export async function getUserByUsername(username) {
   const usersRef = collection(db, "users");
   const q = query(usersRef, where("displayName", "==", username));
@@ -56,7 +58,9 @@ export async function getUserByUsername(username) {
   return { id: docSnap.id, ...docSnap.data() };
 }
 
+// ======================================================
 // Opdatere eksisterende brugerprofil
+// ======================================================
 export async function updateUserProfile(uid, data) {
   const userRef = doc(db, "users", uid);
   await updateDoc(userRef, {
@@ -65,7 +69,9 @@ export async function updateUserProfile(uid, data) {
   });
 }
 
+// ======================================================
 // Opdater lastActive for online status
+// ======================================================
 export async function updateLastActive(uid) {
   try {
     const userRef = doc(db, "users", uid);
@@ -77,7 +83,9 @@ export async function updateLastActive(uid) {
   }
 }
 
-// Check om bruger er online (aktiv inden for 5 minutter)
+// ======================================================
+// Check om bruger er online (aktiv inden for 5 min)
+// ======================================================
 export function isUserOnline(lastActiveTimestamp) {
   if (!lastActiveTimestamp) return false;
   
@@ -92,13 +100,17 @@ export function isUserOnline(lastActiveTimestamp) {
 const statsCache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+// ======================================================
 // Clear cache (for debugging)
+// ======================================================
 export function clearStatsCache() {
   statsCache.clear();
   console.log("[getUserStats] Cache cleared");
 }
 
+// ======================================================
 // Hent bruger statistikker (posts, kommentarer, aktivitet)
+// ======================================================
 export async function getUserStats(uid) {
   try {
     // Check cache first
@@ -183,7 +195,9 @@ export async function getUserStats(uid) {
   }
 }
 
-// Upload profilbillede som base64 og gem direkte i Firestore
+// ======================================================
+// Upload profilbillede som base64
+// ======================================================
 export async function uploadProfilePictureAsBase64(uid, file) {
   if (!file) throw new Error("Ingen fil valgt");
 

@@ -1,4 +1,7 @@
 // src/pages/userProfile.jsx
+// ======================================================
+// Andre brugeres profil med statistik og chat-mulighed
+// ======================================================
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";

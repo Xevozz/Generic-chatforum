@@ -15,6 +15,9 @@ import {
   limit,
 } from "firebase/firestore";
 
+// ======================================================
+// Opret en notifikation (kommentar eller like)
+// ======================================================
 export async function createNotification({
   toUserId,
   fromUserName,
@@ -36,6 +39,9 @@ export async function createNotification({
   });
 }
 
+// ======================================================
+// Lyt til brugerens notifikationer (real-time)
+// ======================================================
 export function listenToNotifications(toUserId, callback, opts = {}) {
   if (!toUserId) {
     callback([]);
@@ -55,11 +61,17 @@ export function listenToNotifications(toUserId, callback, opts = {}) {
   });
 }
 
+// ======================================================
+// Markér en notifikation som læst
+// ======================================================
 export async function markNotificationRead(notificationId) {
   if (!notificationId) return;
   await updateDoc(doc(db, "notifications", notificationId), { isRead: true });
 }
 
+// ======================================================
+// Markér alle notifikationer som læst
+// ======================================================
 export async function markAllNotificationsRead(toUserId) {
   if (!toUserId) return;
 
@@ -77,6 +89,9 @@ export async function markAllNotificationsRead(toUserId) {
   await batch.commit();
 }
 
+// ======================================================
+// Opret en chat-notifikation
+// ======================================================
 export async function createChatNotification({
   toUserId,
   fromUserId,
@@ -97,6 +112,9 @@ export async function createChatNotification({
   });
 }
 
+// ======================================================
+// Lyt til chat-notifikationer (real-time)
+// ======================================================
 export function listenToChatNotifications(toUserId, callback) {
   if (!toUserId) {
     callback([]);

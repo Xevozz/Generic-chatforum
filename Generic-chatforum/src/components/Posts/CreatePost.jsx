@@ -1,4 +1,7 @@
 // src/components/Posts/CreatePost.jsx
+// ======================================================
+// Formular til oprettelse af nye opslag i feedet
+// ======================================================
 import { useState, useEffect } from "react";
 import { createPost } from "../../services/postsService";
 import { listenToUserGroups } from "../../services/groupService";

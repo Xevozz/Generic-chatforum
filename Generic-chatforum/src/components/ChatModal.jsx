@@ -1,3 +1,7 @@
+// src/components/ChatModal.jsx
+// ======================================================
+// Modal til privat chat mellem to brugere
+// ======================================================
 import { useState, useEffect, useRef } from "react";
 import {
   getOrCreateChat,

@@ -1,3 +1,7 @@
+// src/components/ChatsList.jsx
+// ======================================================
+// Liste over brugerens aktive chats
+// ======================================================
 import { useState, useEffect } from 'react';
 import { getUserByUid } from '../services/userService';
 import { 

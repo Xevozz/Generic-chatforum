@@ -1,4 +1,7 @@
 // src/components/AdvancedSearchModal.jsx
+// ======================================================
+// Modal til avanceret søgning med filtre og sortering
+// ======================================================
 import { useState } from "react";
 
 function AdvancedSearchModal({ isOpen, onClose, onApplyFilters }) {

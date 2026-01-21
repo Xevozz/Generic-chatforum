@@ -1,4 +1,7 @@
 // src/components/CreatePostModal.jsx
+// ======================================================
+// Modal til oprettelse af nyt opslag
+// ======================================================
 import { useState, useEffect } from "react";
 import { listenToGroups } from "../services/groupService";
 import { createPost } from "../services/postsService";

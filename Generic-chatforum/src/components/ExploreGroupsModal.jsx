@@ -1,4 +1,7 @@
 // src/components/ExploreGroupsModal.jsx
+// ======================================================
+// Modal til at udforske og administrere grupper
+// ======================================================
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";

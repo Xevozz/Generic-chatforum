@@ -1,4 +1,7 @@
 // src/pages/myProfile.jsx
+// ======================================================
+// Brugerens egen profil med redigering og tema-valg
+// ======================================================
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Layout from "../components/Layout";

@@ -13,7 +13,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
-// Hent alle grupper live
+// ======================================================
+// Hent alle grupper live (real-time)
+// ======================================================
 export function listenToGroups(callback) {
   const groupsRef = collection(db, "groups");
 
@@ -26,7 +28,9 @@ export function listenToGroups(callback) {
   });
 }
 
+// ======================================================
 // Hent kun grupper som brugeren er medlem af (real-time)
+// ======================================================
 export function listenToUserGroups(userId, callback) {
   if (!userId) {
     callback([]);
@@ -49,7 +53,9 @@ export function listenToUserGroups(userId, callback) {
   });
 }
 
-// Hent en enkelt gruppe
+// ======================================================
+// Hent en enkelt gruppe via ID
+// ======================================================
 export async function getGroupById(groupId) {
   const groupRef = doc(db, "groups", groupId);
   const groupSnap = await getDoc(groupRef);
@@ -61,7 +67,9 @@ export async function getGroupById(groupId) {
   return { id: groupSnap.id, ...groupSnap.data() };
 }
 
+// ======================================================
 // Opret en ny gruppe
+// ======================================================
 export async function createGroup(name, creatorId, creatorName) {
   const groupsRef = collection(db, "groups");
   const docRef = await addDoc(groupsRef, {
@@ -75,7 +83,9 @@ export async function createGroup(name, creatorId, creatorName) {
   return docRef;
 }
 
+// ======================================================
 // Meld ind i en gruppe
+// ======================================================
 export async function joinGroup(groupId, userId) {
   const groupRef = doc(db, "groups", groupId);
   
@@ -93,7 +103,9 @@ export async function joinGroup(groupId, userId) {
   }
 }
 
+// ======================================================
 // Meld ud af en gruppe
+// ======================================================
 export async function leaveGroup(groupId, userId) {
   const groupRef = doc(db, "groups", groupId);
   
@@ -111,7 +123,9 @@ export async function leaveGroup(groupId, userId) {
   }
 }
 
+// ======================================================
 // Tjek om bruger er medlem af en gruppe
+// ======================================================
 export async function isUserMember(groupId, userId) {
   const group = await getGroupById(groupId);
   if (!group) return false;

@@ -1,3 +1,7 @@
+// src/components/NotificationBanner.jsx
+// ======================================================
+// Pop-up banner til notifikationer (fx nye beskeder)
+// ======================================================
 import { useState, useEffect } from 'react';
 
 function NotificationBanner({ message, type = 'info', duration = 4000, onClose, onClick }) {

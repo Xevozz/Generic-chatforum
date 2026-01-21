@@ -1,4 +1,7 @@
 // src/components/PostModal.jsx
+// ======================================================
+// Modal til visning af et enkelt opslag
+// ======================================================
 import { useEffect, useState } from "react";
 import { getPostById } from "../services/postsService";
 import Post from "./Posts/Post";

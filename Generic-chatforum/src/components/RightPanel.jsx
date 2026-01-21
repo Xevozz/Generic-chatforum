@@ -1,3 +1,7 @@
+// src/components/RightPanel.jsx
+// ======================================================
+// Højre-panel med nyheder og reklamer/tilbud
+// ======================================================
 import { useState, useEffect } from 'react';
 
 const NEWS_ITEMS = [

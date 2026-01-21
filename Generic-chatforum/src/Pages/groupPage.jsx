@@ -1,4 +1,7 @@
 // src/Pages/groupPage.jsx
+// ======================================================
+// Side til visning af en specifik gruppes opslag
+// ======================================================
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";

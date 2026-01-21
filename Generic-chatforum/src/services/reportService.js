@@ -15,7 +15,9 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// Opret en rapport
+// ======================================================
+// Opret en rapport/anmeldelse af et opslag
+// ======================================================
 export async function createReport({
   postId,
   postTitle,
@@ -48,7 +50,9 @@ export async function createReport({
   return reportRef.id;
 }
 
+// ======================================================
 // Hent alle rapporter (til admin)
+// ======================================================
 export async function getAllReports() {
   const reportsRef = collection(db, "reports");
   const q = query(reportsRef, orderBy("createdAt", "desc"));
@@ -60,7 +64,9 @@ export async function getAllReports() {
   }));
 }
 
+// ======================================================
 // Real-time listener til rapporter
+// ======================================================
 export function subscribeToReports(callback) {
   const reportsRef = collection(db, "reports");
   const q = query(reportsRef, orderBy("createdAt", "desc"));
@@ -76,7 +82,9 @@ export function subscribeToReports(callback) {
   });
 }
 
+// ======================================================
 // Hent rapporter efter status
+// ======================================================
 export async function getReportsByStatus(status) {
   const reportsRef = collection(db, "reports");
   const q = query(
@@ -92,7 +100,9 @@ export async function getReportsByStatus(status) {
   }));
 }
 
+// ======================================================
 // Opdater rapport status
+// ======================================================
 export async function updateReportStatus(reportId, status, adminId, adminNote = "") {
   const reportRef = doc(db, "reports", reportId);
   
@@ -104,12 +114,16 @@ export async function updateReportStatus(reportId, status, adminId, adminNote = 
   });
 }
 
+// ======================================================
 // Godkend rapport (marker opslaget som OK)
+// ======================================================
 export async function approveReport(reportId, adminId, adminNote = "") {
   await updateReportStatus(reportId, "approved", adminId, adminNote);
 }
 
+// ======================================================
 // Skjul opslaget
+// ======================================================
 export async function hidePost(reportId, postId, adminId, adminNote = "") {
   // Opdater post til at være skjult
   const postRef = doc(db, "posts", postId);
@@ -123,7 +137,9 @@ export async function hidePost(reportId, postId, adminId, adminNote = "") {
   await updateReportStatus(reportId, "hidden", adminId, adminNote);
 }
 
+// ======================================================
 // Slet opslaget
+// ======================================================
 export async function deleteReportedPost(reportId, postId, adminId, adminNote = "") {
   // Slet post
   const postRef = doc(db, "posts", postId);
@@ -133,13 +149,17 @@ export async function deleteReportedPost(reportId, postId, adminId, adminNote = 
   await updateReportStatus(reportId, "deleted", adminId, adminNote);
 }
 
+// ======================================================
 // Slet rapport
+// ======================================================
 export async function deleteReport(reportId) {
   const reportRef = doc(db, "reports", reportId);
   await deleteDoc(reportRef);
 }
 
+// ======================================================
 // Tjek om bruger er admin
+// ======================================================
 export async function checkIsAdmin(userId) {
   if (!userId) return false;
   
@@ -153,7 +173,9 @@ export async function checkIsAdmin(userId) {
   return false;
 }
 
+// ======================================================
 // Gør en bruger til admin (kun for setup)
+// ======================================================
 export async function setUserAsAdmin(userId, isAdmin = true) {
   const userRef = doc(db, "users", userId);
   await updateDoc(userRef, {

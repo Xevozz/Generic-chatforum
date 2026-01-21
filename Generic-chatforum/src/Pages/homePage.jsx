@@ -1,4 +1,7 @@
 // src/pages/homePage.jsx
+// ======================================================
+// Forside med brugerens feed fra deres grupper
+// ======================================================
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Layout from "../components/Layout";

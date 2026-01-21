@@ -1,3 +1,7 @@
+// src/pages/loginPage.jsx
+// ======================================================
+// Login-side med email/brugernavn login
+// ======================================================
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginWithEmailOrUsername } from "../services/authService";

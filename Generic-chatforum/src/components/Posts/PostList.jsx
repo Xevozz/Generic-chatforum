@@ -1,4 +1,7 @@
 // src/components/Posts/PostList.jsx
+// ======================================================
+// Liste af opslag med filtrering, søgning og paginering
+// ======================================================
 import { useEffect, useState } from "react";
 import { listenToAllPosts, listenToPostsByGroup, listenToPostsByUserGroups } from "../../services/postsService";
 import { listenToUserGroups } from "../../services/groupService";

@@ -1,4 +1,7 @@
 // src/pages/createUser.jsx
+// ======================================================
+// Side til oprettelse af ny bruger
+// ======================================================
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../services/authService";

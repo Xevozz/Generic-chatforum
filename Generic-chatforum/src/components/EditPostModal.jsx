@@ -1,4 +1,7 @@
 // src/components/EditPostModal.jsx
+// ======================================================
+// Modal til redigering af eksisterende opslag
+// ======================================================
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { updatePost } from "../services/postsService";

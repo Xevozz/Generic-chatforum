@@ -16,13 +16,17 @@ import {
 } from "firebase/firestore";
 import { createChatNotification } from "./notificationsService";
 
+// ======================================================
 // Opretter standardiseret chat-id mellem to brugere
+// ======================================================
 export function getChatId(userId1, userId2) {
   const ids = [userId1, userId2].sort();
   return `${ids[0]}_${ids[1]}`;
 }
 
-// Sender en besked
+// ======================================================
+// Sender en besked i en chat
+// ======================================================
 export async function sendMessage(chatId, senderId, senderName, senderAvatar, messageText, recipientId) {
   if (!messageText.trim()) {
     throw new Error("Beskeden kan ikke være tom");
@@ -66,7 +70,9 @@ export async function sendMessage(chatId, senderId, senderName, senderAvatar, me
   return newMessageRef.id;
 }
 
+// ======================================================
 // Real-time listener på chat-beskeder
+// ======================================================
 export function subscribeToChatMessages(chatId, callback) {
   const messagesRef = collection(db, "chats", chatId, "messages");
   const q = query(messagesRef, orderBy("timestamp", "asc"));
@@ -84,7 +90,9 @@ export function subscribeToChatMessages(chatId, callback) {
   return unsubscribe;
 }
 
+// ======================================================
 // Henter eller opretter chat-dokument
+// ======================================================
 export async function getOrCreateChat(userId1, userId2, user1Name, user1Avatar, user2Name, user2Avatar) {
   const chatId = getChatId(userId1, userId2);
   const chatRef = doc(db, "chats", chatId);
@@ -112,7 +120,9 @@ export async function getOrCreateChat(userId1, userId2, user1Name, user1Avatar, 
   }
 }
 
+// ======================================================
 // Markér alle beskeder som læst
+// ======================================================
 export async function markChatAsRead(chatId, userId) {
   try {
     const messagesRef = collection(db, "chats", chatId, "messages");
@@ -143,7 +153,10 @@ export async function markChatAsRead(chatId, userId) {
     console.error("Fejl ved markering af chat som læst:", error);
   }
 }
+
+// ======================================================
 // Real-time listener på alle chats for en bruger
+// ======================================================
 export function subscribeToUserChats(userId, callback) {
   if (!userId) {
     console.log("No userId provided to subscribeToUserChats");

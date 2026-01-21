@@ -1,4 +1,7 @@
 // src/components/Navbar.jsx
+// ======================================================
+// Navigationsbar med søgning, notifikationer, chat og bruger-menu
+// ======================================================
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";

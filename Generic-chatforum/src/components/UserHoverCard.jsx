@@ -1,3 +1,7 @@
+// src/components/UserHoverCard.jsx
+// ======================================================
+// Hover-kort der viser brugerinfo ved hover på brugernavn
+// ======================================================
 import { useEffect, useState } from "react";
 import { getUserStats, isUserOnline, getUserByUid } from "../services/userService";
 

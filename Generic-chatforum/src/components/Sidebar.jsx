@@ -1,3 +1,7 @@
+// src/components/Sidebar.jsx
+// ======================================================
+// Sidebar med brugerens grupper og navigation
+// ======================================================
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { listenToUserGroups, getGroupById } from "../services/groupService";

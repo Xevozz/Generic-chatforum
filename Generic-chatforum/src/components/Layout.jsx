@@ -1,4 +1,7 @@
 // src/components/Layout.jsx
+// ======================================================
+// Hoved-layout med sidebar, feed og højre-panel
+// ======================================================
 import Sidebar from "./Sidebar";
 import RightPanel from "./RightPanel";
 
